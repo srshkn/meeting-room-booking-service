@@ -22,7 +22,7 @@ func New() (*config, string, error) {
 	var cfg config
 
 	if err := godotenv.Load(); err != nil && !errors.Is(err, os.ErrNotExist) {
-		return nil, "", fmt.Errorf("load .env: %w", err)
+		return &config{}, "", fmt.Errorf("load .env: %w", err)
 	}
 
 	prefix := os.Getenv(configPrefixEnv)

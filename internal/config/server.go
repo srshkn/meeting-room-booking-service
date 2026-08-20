@@ -8,7 +8,7 @@ import (
 const (
 	serverHostEnv            string = "SERVER_HOST"
 	serverPortEnv            string = "SERVER_PORT"
-	shutdownTimeoutSecondEnv string = "SHUTDOWN_TIMEOUT_SECOND"
+	serverShutdownTimeoutEnv string = "SERVER_SHUTDOWN_TIMEOUT"
 )
 
 type Server interface {
@@ -53,7 +53,7 @@ func (s ServerHTTP) validate() error {
 	case s.ShutdownTimeout <= 0:
 		return fmt.Errorf(
 			"environment variable %q must be greater than 0",
-			shutdownTimeoutSecondEnv,
+			serverShutdownTimeoutEnv,
 		)
 	}
 
