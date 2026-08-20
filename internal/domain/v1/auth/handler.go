@@ -13,7 +13,7 @@ func (h *AuthHandler) PostAuthDummyLogin(
 	request v1GenAPI.PostAuthDummyLoginRequestObject,
 ) (v1GenAPI.PostAuthDummyLoginResponseObject, error)
 
-func PostAuthLogin(
+func (h *AuthHandler) PostAuthLogin(
 	ctx context.Context,
 	request v1GenAPI.PostAuthLoginRequestObject,
 ) (v1GenAPI.PostAuthLoginResponseObject, error)
