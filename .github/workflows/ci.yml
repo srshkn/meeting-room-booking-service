@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - release
+    paths-ignore:
+      - README.md
+      - LICENSE
+      - .env.example
+      - .version
+      - docs/**
+      - db/**
+      - api/*
+      - .gitignore
+      - .dockerignore
+
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  checks-go:
+    runs-on: ubuntu-latest
+
+    env:
+        SERVER_HOST: ${{ secrets.TEST_SERVER_HOST }}
+        SERVER_PORT: ${{ secrets.TEST_SERVER_PORT }}
+        SHOTDOWN_TIMEOUT_SECOND: ${{ secrets.TEST_SERVER_SHUTDOWN_TIMEOUT }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Check formatting
+        shell: bash
+        run: |
+          files="$(gofmt -l .)"
+
+          if [[ -n "$files" ]]; then
+            echo "These files are not formatted:"
+            echo "$files"
+            exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test ./...
+
+      - name: Build
+        run: go build ./...
