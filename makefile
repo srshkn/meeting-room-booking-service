@@ -54,6 +54,7 @@ help:
 	@echo "Generation:"
 	@echo "  env-gen              Create .env from .env.example"
 	@echo "  v1api-gen            Generate Go code from OpenAPI specification"
+	@echo "  sql-gen              Generate Go code from SQL queries"
 	@echo ""
 	@echo "Migrations:"
 	@echo "  migrate-create       Create a new migration (name=<migration_name>)"
@@ -78,6 +79,9 @@ v1api-gen:
 	go tool oapi-codegen -config ./api/v1/configs/server.yml ./$(V1API)
 	go tool oapi-codegen -config ./api/v1/configs/models.yml ./$(V1API)
 	go tool oapi-codegen -config ./api/v1/configs/spec.yml ./$(V1API)
+
+sql-gen:
+	sqlc generate
 
 # -------------------------------------------------------------------------
 # MIGRATIONS
