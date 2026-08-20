@@ -8,7 +8,7 @@ import (
 const (
 	serverHostEnv            string = "SERVER_HOST"
 	serverPortEnv            string = "SERVER_PORT"
-	shutdownTimeoutSecondEnv string = "SHOTDOWN_TIMEOUT_SECOND"
+	shutdownTimeoutSecondEnv string = "SHUTDOWN_TIMEOUT_SECOND"
 )
 
 type iServer interface {
@@ -18,9 +18,9 @@ type iServer interface {
 }
 
 type Server struct {
-	Host                  string        `conf:"required"`
-	Port                  int           `conf:"required"`
-	ShutdownTimeoutSecond time.Duration `conf:"required"`
+	Host            string        `conf:"required"`
+	Port            int           `conf:"required"`
+	ShutdownTimeout time.Duration `conf:"required"`
 }
 
 func (s *Server) GetHost() string {
@@ -31,8 +31,8 @@ func (s *Server) GetPort() int {
 	return s.Port
 }
 
-func (s *Server) ShutdownTimeout() time.Duration {
-	return s.ShutdownTimeoutSecond
+func (s *Server) GetShutdownTimeout() time.Duration {
+	return s.ShutdownTimeout
 }
 
 func (s *Server) validateServer() error {
@@ -50,7 +50,7 @@ func (s *Server) validateServer() error {
 			serverPortEnv,
 		)
 
-	case s.ShutdownTimeoutSecond <= 0:
+	case s.ShutdownTimeout <= 0:
 		return fmt.Errorf(
 			"environment variable %q must be greater than 0",
 			shutdownTimeoutSecondEnv,
