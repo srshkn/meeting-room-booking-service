@@ -1,0 +1,40 @@
+package config
+
+import (
+	"errors"
+	"fmt"
+	"os"
+
+	"github.com/ardanlabs/conf/v3"
+	"github.com/joho/godotenv"
+)
+
+const prefix = "MRB"
+
+type Config interface {
+	Server() *Server
+}
+
+type config struct {
+	Server Server
+}
+
+func New() (*config, string, error) {
+	var cfg config
+
+	if err := godotenv.Load(); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return nil, "", fmt.Errorf("load .env: %w", err)
+	}
+
+	help, err := conf.Parse(prefix, &cfg)
+	if err != nil {
+		return &config{}, help, fmt.Errorf("parse config: %w", err)
+	}
+
+	if err := cfg.Server.validateServer(); err != nil {
+		return &config{}, "", fmt.Errorf("")
+	}
+
+	return &cfg, "", nil
+
+}

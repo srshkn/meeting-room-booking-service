@@ -1,7 +1,17 @@
-package server
+package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"mrb-service/internal/config"
+)
 
 func main() {
-	fmt.Println("Let's start!")
+	cfg, help, err := config.New()
+	if err != nil {
+		fmt.Printf("help: %s;\nerr: %s\n", help, err)
+		return
+	}
+
+	fmt.Printf("Server: host: %s, port: %d", cfg.Server.Host, cfg.Server.Port)
 }
