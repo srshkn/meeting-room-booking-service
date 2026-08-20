@@ -35,7 +35,7 @@ func main() {
 	// -------------------------------------------------------------------------
 	// Database
 
-	pool, err := postgres.NewPool(ctx, cfg.Database)
+	pool, err := postgres.NewPool(ctx, cfg.Postgres)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
