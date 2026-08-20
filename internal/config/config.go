@@ -14,7 +14,8 @@ const (
 )
 
 type config struct {
-	Server Server
+	Server   *ServerHTTP
+	Database *Postgres
 }
 
 func New() (*config, string, error) {
@@ -32,6 +33,10 @@ func New() (*config, string, error) {
 	}
 
 	if err := cfg.Server.validateServer(); err != nil {
+		return &config{}, "", fmt.Errorf("validate config: %w", err)
+	}
+
+	if err := cfg.Database.validatePostgres(); err != nil {
 		return &config{}, "", fmt.Errorf("validate config: %w", err)
 	}
 
