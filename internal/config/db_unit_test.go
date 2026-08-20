@@ -112,7 +112,7 @@ func TestPostgresValidate(t *testing.T) {
 			prepare: func(p *Postgres) {
 				p.Name = strings.Repeat("a", 64)
 			},
-			wantErr: `environment variable "DB_DB" must not exceed 63 bytes`,
+			wantErr: `environment variable "DB_NAME" must not exceed 63 bytes`,
 		},
 	}
 

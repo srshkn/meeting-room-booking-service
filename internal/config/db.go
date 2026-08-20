@@ -11,7 +11,7 @@ const (
 	dbPortEnv     string = "DB_PORT"
 	dbUserEnv     string = "DB_USER"
 	dbPasswordEnv string = "DB_PASSWORD"
-	dbDataBaseEnv string = "DB_DB"
+	dbDataBaseEnv string = "DB_NAME"
 
 	dbMaxOpenConnsEnv    string = "DB_MAX_OPEN_CONNS"
 	dbMinOpenConnsEnv    string = "DB_MIN_OPEN_CONNS"
