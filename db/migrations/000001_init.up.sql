@@ -9,7 +9,7 @@ VALUES
     ('admin');
 
 CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     username VARCHAR(25) NOT NULL,
     email VARCHAR(254) NOT NULL,
     password_hash TEXT NOT NULL,
@@ -28,7 +28,7 @@ CREATE UNIQUE INDEX users_email_unique_idx
 ON users (LOWER(email));
 
 CREATE TABLE refresh_tokens (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     user_id UUID NOT NULL,
     token_hash VARCHAR(64) NOT NULL UNIQUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
