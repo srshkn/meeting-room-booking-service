@@ -13,7 +13,7 @@ func TestPostgresValidate(t *testing.T) {
 			Port:            5432,
 			User:            "postgres",
 			Password:        "password",
-			Database:        "meeting_rooms",
+			Name:            "meeting_rooms",
 			MaxOpenConns:    10,
 			MinOpenConns:    2,
 			ConnMaxLifetime: 30 * time.Minute,
@@ -35,84 +35,84 @@ func TestPostgresValidate(t *testing.T) {
 			prepare: func(p *Postgres) {
 				p.Host = ""
 			},
-			wantErr: `environment variable "POSTGRES_HOST" is required`,
+			wantErr: `environment variable "DB_HOST" is required`,
 		},
 		{
 			name: "port less than minimum",
 			prepare: func(p *Postgres) {
 				p.Port = 0
 			},
-			wantErr: `environment variable "POSTGRES_PORT" must be between 1 and 65535`,
+			wantErr: `environment variable "DB_PORT" must be between 1 and 65535`,
 		},
 		{
 			name: "port greater than maximum",
 			prepare: func(p *Postgres) {
 				p.Port = 65536
 			},
-			wantErr: `environment variable "POSTGRES_PORT" must be between 1 and 65535`,
+			wantErr: `environment variable "DB_PORT" must be between 1 and 65535`,
 		},
 		{
 			name: "empty user",
 			prepare: func(p *Postgres) {
 				p.User = ""
 			},
-			wantErr: `environment variable "POSTGRES_USER" is required`,
+			wantErr: `environment variable "DB_USER" is required`,
 		},
 		{
 			name: "empty password",
 			prepare: func(p *Postgres) {
 				p.Password = ""
 			},
-			wantErr: `environment variable "POSTGRES_PASSWORD" is required`,
+			wantErr: `environment variable "DB_PASSWORD" is required`,
 		},
 		{
 			name: "empty database",
 			prepare: func(p *Postgres) {
-				p.Database = ""
+				p.Name = ""
 			},
-			wantErr: `environment variable "POSTGRES_DB" is required`,
+			wantErr: `environment variable "DB_NAME" is required`,
 		},
 		{
 			name: "max open conns is zero",
 			prepare: func(p *Postgres) {
 				p.MaxOpenConns = 0
 			},
-			wantErr: `environment variable "MAX_OPEN_CONNS"`,
+			wantErr: `environment variable "DB_MAX_OPEN_CONNS"`,
 		},
 		{
 			name: "min open conns is zero",
 			prepare: func(p *Postgres) {
 				p.MinOpenConns = 0
 			},
-			wantErr: `environment variable "MIN_OPEN_CONNS"`,
+			wantErr: `environment variable "DB_MIN_OPEN_CONNS"`,
 		},
 		{
 			name: "conn max lifetime is zero",
 			prepare: func(p *Postgres) {
 				p.ConnMaxLifetime = 0
 			},
-			wantErr: `environment variable "CONN_MAX_LIFETIME"`,
+			wantErr: `environment variable "DB_CONN_MAX_LIFETIME"`,
 		},
 		{
 			name: "max conn idle time is zero",
 			prepare: func(p *Postgres) {
 				p.MaxConnIdleTime = 0
 			},
-			wantErr: `environment variable "MAX_CONN_IDLE_TIME"`,
+			wantErr: `environment variable "DB_MAX_CONN_IDLE_TIME"`,
 		},
 		{
 			name: "user exceeds 63 bytes",
 			prepare: func(p *Postgres) {
 				p.User = strings.Repeat("a", 64)
 			},
-			wantErr: `environment variable "POSTGRES_USER" must not exceed 63 bytes`,
+			wantErr: `environment variable "DB_USER" must not exceed 63 bytes`,
 		},
 		{
 			name: "database exceeds 63 bytes",
 			prepare: func(p *Postgres) {
-				p.Database = strings.Repeat("a", 64)
+				p.Name = strings.Repeat("a", 64)
 			},
-			wantErr: `environment variable "POSTGRES_DB" must not exceed 63 bytes`,
+			wantErr: `environment variable "DB_DB" must not exceed 63 bytes`,
 		},
 	}
 
@@ -121,7 +121,7 @@ func TestPostgresValidate(t *testing.T) {
 			postgres := validPostgres()
 			tt.prepare(&postgres)
 
-			err := postgres.validatePostgres()
+			err := postgres.validate()
 
 			if tt.wantErr == "" {
 				if err != nil {

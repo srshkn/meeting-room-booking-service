@@ -35,7 +35,7 @@ func (s ServerHTTP) GetShutdownTimeout() time.Duration {
 	return s.ShutdownTimeout
 }
 
-func (s ServerHTTP) validateServer() error {
+func (s ServerHTTP) validate() error {
 	switch {
 
 	case s.Host == "":

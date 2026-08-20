@@ -7,16 +7,16 @@ import (
 )
 
 const (
-	postgresHostEnv     string = "POSTGRES_HOST"
-	postgresPortEnv     string = "POSTGRES_PORT"
-	postgresUserEnv     string = "POSTGRES_USER"
-	postgresPasswordEnv string = "POSTGRES_PASSWORD"
-	postgresDataBaseEnv string = "POSTGRES_DB"
+	dbHostEnv     string = "DB_HOST"
+	dbPortEnv     string = "DB_PORT"
+	dbUserEnv     string = "DB_USER"
+	dbPasswordEnv string = "DB_PASSWORD"
+	dbDataBaseEnv string = "DB_DB"
 
-	maxOpenConnsEnv    string = "MAX_OPEN_CONNS"
-	minOpenConnsEnv    string = "MIN_OPEN_CONNS"
-	connMaxLifetimeEnv string = "CONN_MAX_LIFETIME"
-	maxConnIdleTimeEnv string = "MAX_CONN_IDLE_TIME"
+	dbMaxOpenConnsEnv    string = "DB_MAX_OPEN_CONNS"
+	dbMinOpenConnsEnv    string = "DB_MIN_OPEN_CONNS"
+	dbConnMaxLifetimeEnv string = "DB_CONN_MAX_LIFETIME"
+	dbMaxConnIdleTimeEnv string = "DB_MAX_CONN_IDLE_TIME"
 )
 
 type Database interface {
@@ -32,7 +32,7 @@ type Postgres struct {
 	Port     int    `conf:"required"`
 	User     string `conf:"required"`
 	Password string `conf:"required,mask"`
-	Database string `conf:"required"`
+	Name     string `conf:"required"`
 
 	MaxOpenConns    int32         `conf:"required"`
 	MinOpenConns    int32         `conf:"required"`
@@ -45,7 +45,7 @@ func (p Postgres) GetURL() string {
 		Scheme: "postgres",
 		User:   url.UserPassword(p.User, p.Password),
 		Host:   fmt.Sprintf("%s:%d", p.Host, p.Port),
-		Path:   p.Database,
+		Path:   p.Name,
 	}
 
 	query := databaseURL.Query()
@@ -71,53 +71,53 @@ func (p Postgres) GetMaxConnIdleTime() time.Duration {
 	return p.MaxConnIdleTime
 }
 
-func (p Postgres) validatePostgres() error {
+func (p Postgres) validate() error {
 	switch {
 
 	case p.Host == "":
-		return fmt.Errorf("environment variable %q is required", postgresHostEnv)
+		return fmt.Errorf("environment variable %q is required", dbHostEnv)
 
 	case p.Port < 1 || p.Port > 65535:
-		return fmt.Errorf("environment variable %q must be between 1 and 65535", postgresPortEnv)
+		return fmt.Errorf("environment variable %q must be between 1 and 65535", dbPortEnv)
 
 	case p.User == "":
-		return fmt.Errorf("environment variable %q is required", postgresUserEnv)
+		return fmt.Errorf("environment variable %q is required", dbUserEnv)
 
 	case p.Password == "":
-		return fmt.Errorf("environment variable %q is required", postgresPasswordEnv)
+		return fmt.Errorf("environment variable %q is required", dbPasswordEnv)
 
-	case p.Database == "":
-		return fmt.Errorf("environment variable %q is required", postgresDataBaseEnv)
+	case p.Name == "":
+		return fmt.Errorf("environment variable %q is required", dbDataBaseEnv)
 
 	case p.MaxOpenConns <= 0:
 		return fmt.Errorf(
 			"environment variable %q must be greater than 0",
-			maxOpenConnsEnv,
+			dbMaxOpenConnsEnv,
 		)
 
 	case p.MinOpenConns <= 0:
 		return fmt.Errorf(
 			"environment variable %q must be greater than 0",
-			minOpenConnsEnv,
+			dbMinOpenConnsEnv,
 		)
 
 	case p.ConnMaxLifetime <= 0:
 		return fmt.Errorf(
 			"environment variable %q must be greater than 0",
-			connMaxLifetimeEnv,
+			dbConnMaxLifetimeEnv,
 		)
 
 	case p.MaxConnIdleTime <= 0:
 		return fmt.Errorf(
 			"environment variable %q must be greater than 0",
-			maxConnIdleTimeEnv,
+			dbMaxConnIdleTimeEnv,
 		)
 
 	case p.MinOpenConns > p.MaxOpenConns:
 		return fmt.Errorf(
 			"environment variable %q must not exceed %q",
-			minOpenConnsEnv,
-			maxOpenConnsEnv,
+			dbMinOpenConnsEnv,
+			dbMaxOpenConnsEnv,
 		)
 
 	}
@@ -125,14 +125,14 @@ func (p Postgres) validatePostgres() error {
 	if len(p.User) > 63 {
 		return fmt.Errorf(
 			"environment variable %q must not exceed 63 bytes",
-			postgresUserEnv,
+			dbUserEnv,
 		)
 	}
 
-	if len(p.Database) > 63 {
+	if len(p.Name) > 63 {
 		return fmt.Errorf(
 			"environment variable %q must not exceed 63 bytes",
-			postgresDataBaseEnv,
+			dbDataBaseEnv,
 		)
 	}
 
