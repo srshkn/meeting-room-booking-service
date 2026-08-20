@@ -1,0 +1,56 @@
+networks:
+  app:
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+    networks:
+      - app
+
+  server:
+        build:
+          context: .
+          dockerfile: Dockerfile
+
+        restart: unless-stopped
+
+        volumes:
+              - ./secrets:/app/secrets:ro
+        environment:
+          SERVER_HOST: ${SERVER_HOST}
+          SERVER_PORT: ${SERVER_PORT}
+          SERVER_SHUTDOWN_TIMEOUT: ${SERVER_SHUTDOWN_TIMEOUT}
+
+          DB_HOST: db
+          DB_PORT: ${DB_PORT}
+          DB_USER: ${DB_USER}
+          DB_PASSWORD: ${DB_PASSWORD}
+          DB_NAME: ${DB_NAME}
+          DB_MAX_OPEN_CONNS: ${DB_MAX_OPEN_CONNS}
+          DB_MIN_OPEN_CONNS: ${DB_MIN_OPEN_CONNS}
+          DB_CONN_MAX_LIFETIME: ${DB_CONN_MAX_LIFETIME}
+          DB_MAX_CONN_IDLE_TIME: ${DB_MAX_CONN_IDLE_TIME}
+
+        networks:
+          - app
+
+volumes:
+  postgres_data:
