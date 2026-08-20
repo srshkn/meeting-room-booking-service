@@ -24,9 +24,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-        SERVER_HOST: ${{ secrets.TEST_SERVER_HOST }}
-        SERVER_PORT: ${{ secrets.TEST_SERVER_PORT }}
-        SHOTDOWN_TIMEOUT_SECOND: ${{ secrets.TEST_SERVER_SHUTDOWN_TIMEOUT }}
+      CONFIG_PREFIX: TEST
+      TEST_SERVER_HOST: ${{ secrets.TEST_SERVER_HOST }}
+      TEST_SERVER_PORT: ${{ secrets.TEST_SERVER_PORT }}
+      TEST_SERVER_SHOTDOWN_TIMEOUT: ${{ secrets.TEST_SERVER_SHUTDOWN_TIMEOUT }}
 
     steps:
       - name: Checkout
