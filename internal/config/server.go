@@ -11,31 +11,31 @@ const (
 	shutdownTimeoutSecondEnv string = "SHUTDOWN_TIMEOUT_SECOND"
 )
 
-type iServer interface {
+type Server interface {
 	GetHost() string
 	GetPort() int
 	GetShutdownTimeout() time.Duration
 }
 
-type Server struct {
+type ServerHTTP struct {
 	Host            string        `conf:"required"`
 	Port            int           `conf:"required"`
 	ShutdownTimeout time.Duration `conf:"required"`
 }
 
-func (s *Server) GetHost() string {
+func (s ServerHTTP) GetHost() string {
 	return s.Host
 }
 
-func (s *Server) GetPort() int {
+func (s ServerHTTP) GetPort() int {
 	return s.Port
 }
 
-func (s *Server) GetShutdownTimeout() time.Duration {
+func (s ServerHTTP) GetShutdownTimeout() time.Duration {
 	return s.ShutdownTimeout
 }
 
-func (s *Server) validateServer() error {
+func (s ServerHTTP) validateServer() error {
 	switch {
 
 	case s.Host == "":
