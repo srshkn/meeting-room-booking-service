@@ -17,6 +17,12 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// PostAuthDummyLogin Получить тестовый JWT по роли. Доступен без авторизации.
+	// (POST /auth/dummyLogin)
+	PostAuthDummyLogin(w http.ResponseWriter, r *http.Request)
+	// PostAuthLogin Авторизация по email и паролю
+	// (POST /auth/login)
+	PostAuthLogin(w http.ResponseWriter, r *http.Request)
 	// PostBookingsCreate Создать бронь на слот (только user). Опционально — запросить ссылку на конференцию.
 	// (POST /bookings/create)
 	PostBookingsCreate(w http.ResponseWriter, r *http.Request)
@@ -29,15 +35,6 @@ type ServerInterface interface {
 	// PostBookingsBookingIdCancel Отменить бронь (только своя бронь, только user)
 	// (POST /bookings/{bookingId}/cancel)
 	PostBookingsBookingIdCancel(w http.ResponseWriter, r *http.Request, bookingId BookingIdPath)
-	// PostDummyLogin Получить тестовый JWT по роли (ОБЯЗАТЕЛЬНО). Доступен без авторизации.
-	// (POST /dummyLogin)
-	PostDummyLogin(w http.ResponseWriter, r *http.Request)
-	// PostLogin Авторизация по email и паролю (ДОПОЛНИТЕЛЬНОЕ ЗАДАНИЕ — необязательно)
-	// (POST /login)
-	PostLogin(w http.ResponseWriter, r *http.Request)
-	// PostRegister Регистрация пользователя (ДОПОЛНИТЕЛЬНОЕ ЗАДАНИЕ — необязательно)
-	// (POST /register)
-	PostRegister(w http.ResponseWriter, r *http.Request)
 	// PostRoomsCreate Создать переговорку (только admin)
 	// (POST /rooms/create)
 	PostRoomsCreate(w http.ResponseWriter, r *http.Request)
@@ -50,11 +47,26 @@ type ServerInterface interface {
 	// GetRoomsRoomIdSlotsList Список доступных для бронирования слотов по переговорке и дате (admin и user). Наиболее нагруженный эндпоинт.
 	// (GET /rooms/{roomId}/slots/list)
 	GetRoomsRoomIdSlotsList(w http.ResponseWriter, r *http.Request, roomId RoomIdPath, params GetRoomsRoomIdSlotsListParams)
+	// PostUserRegister Регистрация пользователя
+	// (POST /user/register)
+	PostUserRegister(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
 
 type Unimplemented struct{}
+
+// PostAuthDummyLogin Получить тестовый JWT по роли. Доступен без авторизации.
+// (POST /auth/dummyLogin)
+func (_ Unimplemented) PostAuthDummyLogin(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// PostAuthLogin Авторизация по email и паролю
+// (POST /auth/login)
+func (_ Unimplemented) PostAuthLogin(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
 
 // PostBookingsCreate Создать бронь на слот (только user). Опционально — запросить ссылку на конференцию.
 // (POST /bookings/create)
@@ -77,24 +89,6 @@ func (_ Unimplemented) GetBookingsMy(w http.ResponseWriter, r *http.Request) {
 // PostBookingsBookingIdCancel Отменить бронь (только своя бронь, только user)
 // (POST /bookings/{bookingId}/cancel)
 func (_ Unimplemented) PostBookingsBookingIdCancel(w http.ResponseWriter, r *http.Request, bookingId BookingIdPath) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// PostDummyLogin Получить тестовый JWT по роли (ОБЯЗАТЕЛЬНО). Доступен без авторизации.
-// (POST /dummyLogin)
-func (_ Unimplemented) PostDummyLogin(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// PostLogin Авторизация по email и паролю (ДОПОЛНИТЕЛЬНОЕ ЗАДАНИЕ — необязательно)
-// (POST /login)
-func (_ Unimplemented) PostLogin(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// PostRegister Регистрация пользователя (ДОПОЛНИТЕЛЬНОЕ ЗАДАНИЕ — необязательно)
-// (POST /register)
-func (_ Unimplemented) PostRegister(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -122,6 +116,12 @@ func (_ Unimplemented) GetRoomsRoomIdSlotsList(w http.ResponseWriter, r *http.Re
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// PostUserRegister Регистрация пользователя
+// (POST /user/register)
+func (_ Unimplemented) PostUserRegister(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // ServerInterfaceWrapper converts contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler            ServerInterface
@@ -130,6 +130,34 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
+
+// PostAuthDummyLogin operation middleware
+func (siw *ServerInterfaceWrapper) PostAuthDummyLogin(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostAuthDummyLogin(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PostAuthLogin operation middleware
+func (siw *ServerInterfaceWrapper) PostAuthLogin(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostAuthLogin(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
 
 // PostBookingsCreate operation middleware
 func (siw *ServerInterfaceWrapper) PostBookingsCreate(w http.ResponseWriter, r *http.Request) {
@@ -231,48 +259,6 @@ func (siw *ServerInterfaceWrapper) PostBookingsBookingIdCancel(w http.ResponseWr
 	handler.ServeHTTP(w, r)
 }
 
-// PostDummyLogin operation middleware
-func (siw *ServerInterfaceWrapper) PostDummyLogin(w http.ResponseWriter, r *http.Request) {
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostDummyLogin(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// PostLogin operation middleware
-func (siw *ServerInterfaceWrapper) PostLogin(w http.ResponseWriter, r *http.Request) {
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostLogin(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// PostRegister operation middleware
-func (siw *ServerInterfaceWrapper) PostRegister(w http.ResponseWriter, r *http.Request) {
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostRegister(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
 // PostRoomsCreate operation middleware
 func (siw *ServerInterfaceWrapper) PostRoomsCreate(w http.ResponseWriter, r *http.Request) {
 
@@ -360,6 +346,20 @@ func (siw *ServerInterfaceWrapper) GetRoomsRoomIdSlotsList(w http.ResponseWriter
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetRoomsRoomIdSlotsList(w, r, roomId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PostUserRegister operation middleware
+func (siw *ServerInterfaceWrapper) PostUserRegister(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostUserRegister(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -483,13 +483,13 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/register", wrapper.PostRegister)
+		r.Post(options.BaseURL+"/user/register", wrapper.PostUserRegister)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/login", wrapper.PostLogin)
+		r.Post(options.BaseURL+"/auth/login", wrapper.PostAuthLogin)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/dummyLogin", wrapper.PostDummyLogin)
+		r.Post(options.BaseURL+"/auth/dummyLogin", wrapper.PostAuthDummyLogin)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/rooms/list", wrapper.GetRoomsList)
@@ -517,6 +517,106 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 
 	return r
+}
+
+type PostAuthDummyLoginRequestObject struct {
+	Body *PostAuthDummyLoginJSONRequestBody
+}
+
+type PostAuthDummyLoginResponseObject interface {
+	VisitPostAuthDummyLoginResponse(w http.ResponseWriter) error
+}
+
+type PostAuthDummyLogin200JSONResponse Token
+
+func (response PostAuthDummyLogin200JSONResponse) VisitPostAuthDummyLoginResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PostAuthDummyLogin400JSONResponse ErrorResponse
+
+func (response PostAuthDummyLogin400JSONResponse) VisitPostAuthDummyLoginResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PostAuthDummyLogin500JSONResponse InternalErrorResponse
+
+func (response PostAuthDummyLogin500JSONResponse) VisitPostAuthDummyLoginResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PostAuthLoginRequestObject struct {
+	Body *PostAuthLoginJSONRequestBody
+}
+
+type PostAuthLoginResponseObject interface {
+	VisitPostAuthLoginResponse(w http.ResponseWriter) error
+}
+
+type PostAuthLogin200JSONResponse Token
+
+func (response PostAuthLogin200JSONResponse) VisitPostAuthLoginResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PostAuthLogin401JSONResponse ErrorResponse
+
+func (response PostAuthLogin401JSONResponse) VisitPostAuthLoginResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PostAuthLogin500JSONResponse InternalErrorResponse
+
+func (response PostAuthLogin500JSONResponse) VisitPostAuthLoginResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+	_, err := buf.WriteTo(w)
+	return err
 }
 
 type PostBookingsCreateRequestObject struct {
@@ -853,158 +953,6 @@ func (response PostBookingsBookingIdCancel500JSONResponse) VisitPostBookingsBook
 	return err
 }
 
-type PostDummyLoginRequestObject struct {
-	Body *PostDummyLoginJSONRequestBody
-}
-
-type PostDummyLoginResponseObject interface {
-	VisitPostDummyLoginResponse(w http.ResponseWriter) error
-}
-
-type PostDummyLogin200JSONResponse Token
-
-func (response PostDummyLogin200JSONResponse) VisitPostDummyLoginResponse(w http.ResponseWriter) error {
-
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(response); err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	_, err := buf.WriteTo(w)
-	return err
-}
-
-type PostDummyLogin400JSONResponse ErrorResponse
-
-func (response PostDummyLogin400JSONResponse) VisitPostDummyLoginResponse(w http.ResponseWriter) error {
-
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(response); err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-	_, err := buf.WriteTo(w)
-	return err
-}
-
-type PostDummyLogin500JSONResponse InternalErrorResponse
-
-func (response PostDummyLogin500JSONResponse) VisitPostDummyLoginResponse(w http.ResponseWriter) error {
-
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(response); err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-	_, err := buf.WriteTo(w)
-	return err
-}
-
-type PostLoginRequestObject struct {
-	Body *PostLoginJSONRequestBody
-}
-
-type PostLoginResponseObject interface {
-	VisitPostLoginResponse(w http.ResponseWriter) error
-}
-
-type PostLogin200JSONResponse Token
-
-func (response PostLogin200JSONResponse) VisitPostLoginResponse(w http.ResponseWriter) error {
-
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(response); err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	_, err := buf.WriteTo(w)
-	return err
-}
-
-type PostLogin401JSONResponse ErrorResponse
-
-func (response PostLogin401JSONResponse) VisitPostLoginResponse(w http.ResponseWriter) error {
-
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(response); err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-	_, err := buf.WriteTo(w)
-	return err
-}
-
-type PostLogin500JSONResponse InternalErrorResponse
-
-func (response PostLogin500JSONResponse) VisitPostLoginResponse(w http.ResponseWriter) error {
-
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(response); err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-	_, err := buf.WriteTo(w)
-	return err
-}
-
-type PostRegisterRequestObject struct {
-	Body *PostRegisterJSONRequestBody
-}
-
-type PostRegisterResponseObject interface {
-	VisitPostRegisterResponse(w http.ResponseWriter) error
-}
-
-type PostRegister201JSONResponse struct {
-	User *User `json:"user,omitempty"`
-}
-
-func (response PostRegister201JSONResponse) VisitPostRegisterResponse(w http.ResponseWriter) error {
-
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(response); err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(201)
-	_, err := buf.WriteTo(w)
-	return err
-}
-
-type PostRegister400JSONResponse ErrorResponse
-
-func (response PostRegister400JSONResponse) VisitPostRegisterResponse(w http.ResponseWriter) error {
-
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(response); err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-	_, err := buf.WriteTo(w)
-	return err
-}
-
-type PostRegister500JSONResponse InternalErrorResponse
-
-func (response PostRegister500JSONResponse) VisitPostRegisterResponse(w http.ResponseWriter) error {
-
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(response); err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-	_, err := buf.WriteTo(w)
-	return err
-}
-
 type PostRoomsCreateRequestObject struct {
 	Body *PostRoomsCreateJSONRequestBody
 }
@@ -1326,8 +1274,66 @@ func (response GetRoomsRoomIdSlotsList500JSONResponse) VisitGetRoomsRoomIdSlotsL
 	return err
 }
 
+type PostUserRegisterRequestObject struct {
+	Body *PostUserRegisterJSONRequestBody
+}
+
+type PostUserRegisterResponseObject interface {
+	VisitPostUserRegisterResponse(w http.ResponseWriter) error
+}
+
+type PostUserRegister201JSONResponse struct {
+	User *User `json:"user,omitempty"`
+}
+
+func (response PostUserRegister201JSONResponse) VisitPostUserRegisterResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PostUserRegister400JSONResponse ErrorResponse
+
+func (response PostUserRegister400JSONResponse) VisitPostUserRegisterResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PostUserRegister500JSONResponse InternalErrorResponse
+
+func (response PostUserRegister500JSONResponse) VisitPostUserRegisterResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
+	// PostAuthDummyLogin Получить тестовый JWT по роли. Доступен без авторизации.
+	// (POST /auth/dummyLogin)
+	PostAuthDummyLogin(ctx context.Context, request PostAuthDummyLoginRequestObject) (PostAuthDummyLoginResponseObject, error)
+	// PostAuthLogin Авторизация по email и паролю
+	// (POST /auth/login)
+	PostAuthLogin(ctx context.Context, request PostAuthLoginRequestObject) (PostAuthLoginResponseObject, error)
 	// PostBookingsCreate Создать бронь на слот (только user). Опционально — запросить ссылку на конференцию.
 	// (POST /bookings/create)
 	PostBookingsCreate(ctx context.Context, request PostBookingsCreateRequestObject) (PostBookingsCreateResponseObject, error)
@@ -1340,15 +1346,6 @@ type StrictServerInterface interface {
 	// PostBookingsBookingIdCancel Отменить бронь (только своя бронь, только user)
 	// (POST /bookings/{bookingId}/cancel)
 	PostBookingsBookingIdCancel(ctx context.Context, request PostBookingsBookingIdCancelRequestObject) (PostBookingsBookingIdCancelResponseObject, error)
-	// PostDummyLogin Получить тестовый JWT по роли (ОБЯЗАТЕЛЬНО). Доступен без авторизации.
-	// (POST /dummyLogin)
-	PostDummyLogin(ctx context.Context, request PostDummyLoginRequestObject) (PostDummyLoginResponseObject, error)
-	// PostLogin Авторизация по email и паролю (ДОПОЛНИТЕЛЬНОЕ ЗАДАНИЕ — необязательно)
-	// (POST /login)
-	PostLogin(ctx context.Context, request PostLoginRequestObject) (PostLoginResponseObject, error)
-	// PostRegister Регистрация пользователя (ДОПОЛНИТЕЛЬНОЕ ЗАДАНИЕ — необязательно)
-	// (POST /register)
-	PostRegister(ctx context.Context, request PostRegisterRequestObject) (PostRegisterResponseObject, error)
 	// PostRoomsCreate Создать переговорку (только admin)
 	// (POST /rooms/create)
 	PostRoomsCreate(ctx context.Context, request PostRoomsCreateRequestObject) (PostRoomsCreateResponseObject, error)
@@ -1361,6 +1358,9 @@ type StrictServerInterface interface {
 	// GetRoomsRoomIdSlotsList Список доступных для бронирования слотов по переговорке и дате (admin и user). Наиболее нагруженный эндпоинт.
 	// (GET /rooms/{roomId}/slots/list)
 	GetRoomsRoomIdSlotsList(ctx context.Context, request GetRoomsRoomIdSlotsListRequestObject) (GetRoomsRoomIdSlotsListResponseObject, error)
+	// PostUserRegister Регистрация пользователя
+	// (POST /user/register)
+	PostUserRegister(ctx context.Context, request PostUserRegisterRequestObject) (PostUserRegisterResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
@@ -1400,6 +1400,68 @@ type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
 	options     StrictHTTPServerOptions
+}
+
+// PostAuthDummyLogin operation middleware
+func (sh *strictHandler) PostAuthDummyLogin(w http.ResponseWriter, r *http.Request) {
+	var request PostAuthDummyLoginRequestObject
+
+	var body PostAuthDummyLoginJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostAuthDummyLogin(ctx, request.(PostAuthDummyLoginRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostAuthDummyLogin")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostAuthDummyLoginResponseObject); ok {
+		if err := validResponse.VisitPostAuthDummyLoginResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostAuthLogin operation middleware
+func (sh *strictHandler) PostAuthLogin(w http.ResponseWriter, r *http.Request) {
+	var request PostAuthLoginRequestObject
+
+	var body PostAuthLoginJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostAuthLogin(ctx, request.(PostAuthLoginRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostAuthLogin")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostAuthLoginResponseObject); ok {
+		if err := validResponse.VisitPostAuthLoginResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
 }
 
 // PostBookingsCreate operation middleware
@@ -1502,99 +1564,6 @@ func (sh *strictHandler) PostBookingsBookingIdCancel(w http.ResponseWriter, r *h
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PostBookingsBookingIdCancelResponseObject); ok {
 		if err := validResponse.VisitPostBookingsBookingIdCancelResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// PostDummyLogin operation middleware
-func (sh *strictHandler) PostDummyLogin(w http.ResponseWriter, r *http.Request) {
-	var request PostDummyLoginRequestObject
-
-	var body PostDummyLoginJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PostDummyLogin(ctx, request.(PostDummyLoginRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostDummyLogin")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PostDummyLoginResponseObject); ok {
-		if err := validResponse.VisitPostDummyLoginResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// PostLogin operation middleware
-func (sh *strictHandler) PostLogin(w http.ResponseWriter, r *http.Request) {
-	var request PostLoginRequestObject
-
-	var body PostLoginJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PostLogin(ctx, request.(PostLoginRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostLogin")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PostLoginResponseObject); ok {
-		if err := validResponse.VisitPostLoginResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// PostRegister operation middleware
-func (sh *strictHandler) PostRegister(w http.ResponseWriter, r *http.Request) {
-	var request PostRegisterRequestObject
-
-	var body PostRegisterJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PostRegister(ctx, request.(PostRegisterRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostRegister")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PostRegisterResponseObject); ok {
-		if err := validResponse.VisitPostRegisterResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -1710,6 +1679,37 @@ func (sh *strictHandler) GetRoomsRoomIdSlotsList(w http.ResponseWriter, r *http.
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetRoomsRoomIdSlotsListResponseObject); ok {
 		if err := validResponse.VisitGetRoomsRoomIdSlotsListResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostUserRegister operation middleware
+func (sh *strictHandler) PostUserRegister(w http.ResponseWriter, r *http.Request) {
+	var request PostUserRegisterRequestObject
+
+	var body PostUserRegisterJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostUserRegister(ctx, request.(PostUserRegisterRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostUserRegister")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostUserRegisterResponseObject); ok {
+		if err := validResponse.VisitPostUserRegisterResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

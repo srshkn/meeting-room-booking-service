@@ -1,13 +1,14 @@
 openapi: 3.0.3
 info:
-  title: Room Booking Service (Test Task)
+  title: Meeting Room Booking Service
   description: Сервис бронирования переговорок
   version: "1.0.0"
 
 servers:
-  - url: http://localhost:8080
+  - url: /api/v1
 
 tags:
+  - name: User
   - name: Auth
   - name: Rooms
   - name: Schedules
@@ -30,6 +31,7 @@ components:
         type: string
         format: uuid
       description: Идентификатор переговорки
+
     BookingIdPath:
       name: bookingId
       in: path
@@ -218,13 +220,13 @@ components:
 
 paths:
   # ──────────────────────────────────────────────────────────────
-  # Auth
+  # User
   # ──────────────────────────────────────────────────────────────
 
-  /register:
+  /user/register:
     post:
-      tags: [Auth]
-      summary: "Регистрация пользователя (ДОПОЛНИТЕЛЬНОЕ ЗАДАНИЕ — необязательно)"
+      tags: [User]
+      summary: "Регистрация пользователя"
       description: >
         Создаёт нового пользователя и возвращает его данные.
         Реализация этого эндпоинта является **дополнительным заданием**.
@@ -267,10 +269,14 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/InternalErrorResponse' }
 
-  /login:
+  # ──────────────────────────────────────────────────────────────
+  # Auth
+  # ──────────────────────────────────────────────────────────────
+
+  /auth/login:
     post:
       tags: [Auth]
-      summary: "Авторизация по email и паролю (ДОПОЛНИТЕЛЬНОЕ ЗАДАНИЕ — необязательно)"
+      summary: "Авторизация по email и паролю"
       description: >
         Авторизует пользователя по email и паролю, возвращает JWT.
         Реализация этого эндпоинта является **дополнительным заданием**.
@@ -307,10 +313,10 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/InternalErrorResponse' }
 
-  /dummyLogin:
+  /auth/dummyLogin:
     post:
       tags: [Auth]
-      summary: Получить тестовый JWT по роли (ОБЯЗАТЕЛЬНО). Доступен без авторизации.
+      summary: Получить тестовый JWT по роли. Доступен без авторизации.
       description: >
         Выдаёт тестовый JWT для указанной роли (admin / user).
         Для каждой роли возвращается **фиксированный UUID** пользователя:

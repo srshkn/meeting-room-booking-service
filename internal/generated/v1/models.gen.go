@@ -87,36 +87,36 @@ func (e UserRole) Valid() bool {
 	}
 }
 
-// Defines values for PostDummyLoginJSONBodyRole.
+// Defines values for PostAuthDummyLoginJSONBodyRole.
 const (
-	PostDummyLoginJSONBodyRoleAdmin PostDummyLoginJSONBodyRole = "admin"
-	PostDummyLoginJSONBodyRoleUser  PostDummyLoginJSONBodyRole = "user"
+	PostAuthDummyLoginJSONBodyRoleAdmin PostAuthDummyLoginJSONBodyRole = "admin"
+	PostAuthDummyLoginJSONBodyRoleUser  PostAuthDummyLoginJSONBodyRole = "user"
 )
 
-// Valid indicates whether the value is a known member of the PostDummyLoginJSONBodyRole enum.
-func (e PostDummyLoginJSONBodyRole) Valid() bool {
+// Valid indicates whether the value is a known member of the PostAuthDummyLoginJSONBodyRole enum.
+func (e PostAuthDummyLoginJSONBodyRole) Valid() bool {
 	switch e {
-	case PostDummyLoginJSONBodyRoleAdmin:
+	case PostAuthDummyLoginJSONBodyRoleAdmin:
 		return true
-	case PostDummyLoginJSONBodyRoleUser:
+	case PostAuthDummyLoginJSONBodyRoleUser:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for PostRegisterJSONBodyRole.
+// Defines values for PostUserRegisterJSONBodyRole.
 const (
-	PostRegisterJSONBodyRoleAdmin PostRegisterJSONBodyRole = "admin"
-	PostRegisterJSONBodyRoleUser  PostRegisterJSONBodyRole = "user"
+	PostUserRegisterJSONBodyRoleAdmin PostUserRegisterJSONBodyRole = "admin"
+	PostUserRegisterJSONBodyRoleUser  PostUserRegisterJSONBodyRole = "user"
 )
 
-// Valid indicates whether the value is a known member of the PostRegisterJSONBodyRole enum.
-func (e PostRegisterJSONBodyRole) Valid() bool {
+// Valid indicates whether the value is a known member of the PostUserRegisterJSONBodyRole enum.
+func (e PostUserRegisterJSONBodyRole) Valid() bool {
 	switch e {
-	case PostRegisterJSONBodyRoleAdmin:
+	case PostUserRegisterJSONBodyRoleAdmin:
 		return true
-	case PostRegisterJSONBodyRoleUser:
+	case PostUserRegisterJSONBodyRoleUser:
 		return true
 	default:
 		return false
@@ -225,6 +225,20 @@ type BookingIdPath = openapi_types.UUID
 // RoomIdPath defines model for RoomIdPath.
 type RoomIdPath = openapi_types.UUID
 
+// PostAuthDummyLoginJSONBody defines parameters for PostAuthDummyLogin.
+type PostAuthDummyLoginJSONBody struct {
+	Role PostAuthDummyLoginJSONBodyRole `json:"role"`
+}
+
+// PostAuthDummyLoginJSONBodyRole defines parameters for PostAuthDummyLogin.
+type PostAuthDummyLoginJSONBodyRole string
+
+// PostAuthLoginJSONBody defines parameters for PostAuthLogin.
+type PostAuthLoginJSONBody struct {
+	Email    openapi_types.Email `json:"email"`
+	Password string              `json:"password"`
+}
+
 // PostBookingsCreateJSONBody defines parameters for PostBookingsCreate.
 type PostBookingsCreateJSONBody struct {
 	CreateConferenceLink *bool              `json:"createConferenceLink,omitempty"`
@@ -240,30 +254,6 @@ type GetBookingsListParams struct {
 	PageSize *int `form:"pageSize,omitempty" json:"pageSize,omitempty"`
 }
 
-// PostDummyLoginJSONBody defines parameters for PostDummyLogin.
-type PostDummyLoginJSONBody struct {
-	Role PostDummyLoginJSONBodyRole `json:"role"`
-}
-
-// PostDummyLoginJSONBodyRole defines parameters for PostDummyLogin.
-type PostDummyLoginJSONBodyRole string
-
-// PostLoginJSONBody defines parameters for PostLogin.
-type PostLoginJSONBody struct {
-	Email    openapi_types.Email `json:"email"`
-	Password string              `json:"password"`
-}
-
-// PostRegisterJSONBody defines parameters for PostRegister.
-type PostRegisterJSONBody struct {
-	Email    openapi_types.Email      `json:"email"`
-	Password string                   `json:"password"`
-	Role     PostRegisterJSONBodyRole `json:"role"`
-}
-
-// PostRegisterJSONBodyRole defines parameters for PostRegister.
-type PostRegisterJSONBodyRole string
-
 // PostRoomsCreateJSONBody defines parameters for PostRoomsCreate.
 type PostRoomsCreateJSONBody struct {
 	Capacity    *int    `json:"capacity,omitempty"`
@@ -277,20 +267,30 @@ type GetRoomsRoomIdSlotsListParams struct {
 	Date openapi_types.Date `form:"date" json:"date"`
 }
 
+// PostUserRegisterJSONBody defines parameters for PostUserRegister.
+type PostUserRegisterJSONBody struct {
+	Email    openapi_types.Email          `json:"email"`
+	Password string                       `json:"password"`
+	Role     PostUserRegisterJSONBodyRole `json:"role"`
+}
+
+// PostUserRegisterJSONBodyRole defines parameters for PostUserRegister.
+type PostUserRegisterJSONBodyRole string
+
+// PostAuthDummyLoginJSONRequestBody defines body for PostAuthDummyLogin for application/json ContentType.
+type PostAuthDummyLoginJSONRequestBody PostAuthDummyLoginJSONBody
+
+// PostAuthLoginJSONRequestBody defines body for PostAuthLogin for application/json ContentType.
+type PostAuthLoginJSONRequestBody PostAuthLoginJSONBody
+
 // PostBookingsCreateJSONRequestBody defines body for PostBookingsCreate for application/json ContentType.
 type PostBookingsCreateJSONRequestBody PostBookingsCreateJSONBody
-
-// PostDummyLoginJSONRequestBody defines body for PostDummyLogin for application/json ContentType.
-type PostDummyLoginJSONRequestBody PostDummyLoginJSONBody
-
-// PostLoginJSONRequestBody defines body for PostLogin for application/json ContentType.
-type PostLoginJSONRequestBody PostLoginJSONBody
-
-// PostRegisterJSONRequestBody defines body for PostRegister for application/json ContentType.
-type PostRegisterJSONRequestBody PostRegisterJSONBody
 
 // PostRoomsCreateJSONRequestBody defines body for PostRoomsCreate for application/json ContentType.
 type PostRoomsCreateJSONRequestBody PostRoomsCreateJSONBody
 
 // PostRoomsRoomIdScheduleCreateJSONRequestBody defines body for PostRoomsRoomIdScheduleCreate for application/json ContentType.
 type PostRoomsRoomIdScheduleCreateJSONRequestBody = Schedule
+
+// PostUserRegisterJSONRequestBody defines body for PostUserRegister for application/json ContentType.
+type PostUserRegisterJSONRequestBody PostUserRegisterJSONBody

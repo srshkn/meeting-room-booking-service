@@ -59,7 +59,7 @@ env-gen:
 v1api-gen:
 	go tool oapi-codegen -config ./api/v1/configs/server.yml ./$(V1API)
 	go tool oapi-codegen -config ./api/v1/configs/models.yml ./$(V1API)
-	go tool oapi-codegen -config ./api/v1/configs/spec.yml ../$(V1API)
+	go tool oapi-codegen -config ./api/v1/configs/spec.yml ./$(V1API)
 
 
 # -------------------------------------------------------------------------
