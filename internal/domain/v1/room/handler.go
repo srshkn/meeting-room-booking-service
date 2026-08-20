@@ -11,9 +11,13 @@ type RoomHandler struct{}
 func (h *RoomHandler) PostRoomsCreate(
 	ctx context.Context,
 	request v1GenAPI.PostRoomsCreateRequestObject,
-) (v1GenAPI.PostRoomsCreateResponseObject, error)
+) (v1GenAPI.PostRoomsCreateResponseObject, error) {
+	return nil, nil
+}
 
 func (h *RoomHandler) GetRoomsList(
 	ctx context.Context,
 	request v1GenAPI.GetRoomsListRequestObject,
-) (v1GenAPI.GetRoomsListResponseObject, error)
+) (v1GenAPI.GetRoomsListResponseObject, error) {
+	return nil, nil
+}

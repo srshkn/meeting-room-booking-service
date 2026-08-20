@@ -11,9 +11,13 @@ type AuthHandler struct{}
 func (h *AuthHandler) PostAuthDummyLogin(
 	ctx context.Context,
 	request v1GenAPI.PostAuthDummyLoginRequestObject,
-) (v1GenAPI.PostAuthDummyLoginResponseObject, error)
+) (v1GenAPI.PostAuthDummyLoginResponseObject, error) {
+	return nil, nil
+}
 
 func (h *AuthHandler) PostAuthLogin(
 	ctx context.Context,
 	request v1GenAPI.PostAuthLoginRequestObject,
-) (v1GenAPI.PostAuthLoginResponseObject, error)
+) (v1GenAPI.PostAuthLoginResponseObject, error) {
+	return nil, nil
+}

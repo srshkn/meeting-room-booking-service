@@ -11,4 +11,6 @@ type UserHandler struct{}
 func (h *UserHandler) PostUserRegister(
 	ctx context.Context,
 	request v1GenAPI.PostUserRegisterRequestObject,
-) (v1GenAPI.PostUserRegisterResponseObject, error)
+) (v1GenAPI.PostUserRegisterResponseObject, error) {
+	return nil, nil
+}

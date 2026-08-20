@@ -11,4 +11,6 @@ type ScheduleHandler struct{}
 func (h *ScheduleHandler) PostRoomsRoomIdScheduleCreate(
 	ctx context.Context,
 	request v1GenAPI.PostRoomsRoomIdScheduleCreateRequestObject,
-) (v1GenAPI.PostRoomsRoomIdScheduleCreateResponseObject, error)
+) (v1GenAPI.PostRoomsRoomIdScheduleCreateResponseObject, error) {
+	return nil, nil
+}
