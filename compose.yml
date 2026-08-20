@@ -39,6 +39,8 @@ services:
           SERVER_PORT: ${SERVER_PORT}
           SERVER_SHUTDOWN_TIMEOUT: ${SERVER_SHUTDOWN_TIMEOUT}
 
+          LOGGER_FORMAT: ${LOGGER_FORMAT}
+
           DB_HOST: db
           DB_PORT: ${DB_PORT}
           DB_USER: ${DB_USER}

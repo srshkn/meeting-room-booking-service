@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"mrb-service/internal/config"
+	"mrb-service/internal/logging"
 	"mrb-service/internal/postgres"
 )
 
@@ -26,18 +28,29 @@ func main() {
 	// -------------------------------------------------------------------------
 	// Configuration
 
-	cfg, help, err := config.New()
+	cfg, _, err := config.New()
 	if err != nil {
-		fmt.Printf("help: %s;\nerr: %s\n", help, err)
+		slog.Error(
+			"failed to load configuration",
+			slog.Any("error", err),
+		)
 		return
 	}
+
+	// -------------------------------------------------------------------------
+	// Logger
+
+	logger := logging.New(cfg.Logger)
 
 	// -------------------------------------------------------------------------
 	// Database
 
 	pool, err := postgres.NewPool(ctx, cfg.Postgres)
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(
+			"connect to PostgreSQL: %v",
+			slog.Any("error", err),
+		)
 		os.Exit(1)
 	}
 	defer pool.Close()
