@@ -8,6 +8,7 @@ servers:
   - url: /api/v1
 
 tags:
+  - name: Meta
   - name: User
   - name: Auth
   - name: Rooms
@@ -219,6 +220,29 @@ components:
           description: Общее количество записей
 
 paths:
+  # ──────────────────────────────────────────────────────────────
+  # User
+  # ──────────────────────────────────────────────────────────────
+  /health:
+    get:
+      tags: [Meta]
+      summary: "Проверка жизни API."
+      description: >
+        Endpoint предназначен для проверки работоспособности API.
+        Возвращает "OK" и статус 200, если сервис жив.
+      responses:
+        "200":
+          description: API работает корректно
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    example: OK
+
   # ──────────────────────────────────────────────────────────────
   # User
   # ──────────────────────────────────────────────────────────────

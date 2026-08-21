@@ -35,6 +35,9 @@ type ServerInterface interface {
 	// PostBookingsBookingIdCancel Отменить бронь (только своя бронь, только user)
 	// (POST /bookings/{bookingId}/cancel)
 	PostBookingsBookingIdCancel(w http.ResponseWriter, r *http.Request, bookingId BookingIdPath)
+	// GetHealth Проверка жизни API.
+	// (GET /health)
+	GetHealth(w http.ResponseWriter, r *http.Request)
 	// PostRoomsCreate Создать переговорку (только admin)
 	// (POST /rooms/create)
 	PostRoomsCreate(w http.ResponseWriter, r *http.Request)
@@ -89,6 +92,12 @@ func (_ Unimplemented) GetBookingsMy(w http.ResponseWriter, r *http.Request) {
 // PostBookingsBookingIdCancel Отменить бронь (только своя бронь, только user)
 // (POST /bookings/{bookingId}/cancel)
 func (_ Unimplemented) PostBookingsBookingIdCancel(w http.ResponseWriter, r *http.Request, bookingId BookingIdPath) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetHealth Проверка жизни API.
+// (GET /health)
+func (_ Unimplemented) GetHealth(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -250,6 +259,20 @@ func (siw *ServerInterfaceWrapper) PostBookingsBookingIdCancel(w http.ResponseWr
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostBookingsBookingIdCancel(w, r, bookingId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetHealth operation middleware
+func (siw *ServerInterfaceWrapper) GetHealth(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetHealth(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -482,6 +505,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		ErrorHandlerFunc:   options.ErrorHandlerFunc,
 	}
 
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/health", wrapper.GetHealth)
+	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/user/register", wrapper.PostUserRegister)
 	})
@@ -953,6 +979,30 @@ func (response PostBookingsBookingIdCancel500JSONResponse) VisitPostBookingsBook
 	return err
 }
 
+type GetHealthRequestObject struct {
+}
+
+type GetHealthResponseObject interface {
+	VisitGetHealthResponse(w http.ResponseWriter) error
+}
+
+type GetHealth200JSONResponse struct {
+	// Status Example: OK
+	Status string `json:"status"`
+}
+
+func (response GetHealth200JSONResponse) VisitGetHealthResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type PostRoomsCreateRequestObject struct {
 	Body *PostRoomsCreateJSONRequestBody
 }
@@ -1346,6 +1396,9 @@ type StrictServerInterface interface {
 	// PostBookingsBookingIdCancel Отменить бронь (только своя бронь, только user)
 	// (POST /bookings/{bookingId}/cancel)
 	PostBookingsBookingIdCancel(ctx context.Context, request PostBookingsBookingIdCancelRequestObject) (PostBookingsBookingIdCancelResponseObject, error)
+	// GetHealth Проверка жизни API.
+	// (GET /health)
+	GetHealth(ctx context.Context, request GetHealthRequestObject) (GetHealthResponseObject, error)
 	// PostRoomsCreate Создать переговорку (только admin)
 	// (POST /rooms/create)
 	PostRoomsCreate(ctx context.Context, request PostRoomsCreateRequestObject) (PostRoomsCreateResponseObject, error)
@@ -1564,6 +1617,30 @@ func (sh *strictHandler) PostBookingsBookingIdCancel(w http.ResponseWriter, r *h
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PostBookingsBookingIdCancelResponseObject); ok {
 		if err := validResponse.VisitPostBookingsBookingIdCancelResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetHealth operation middleware
+func (sh *strictHandler) GetHealth(w http.ResponseWriter, r *http.Request) {
+	var request GetHealthRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetHealth(ctx, request.(GetHealthRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetHealth")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetHealthResponseObject); ok {
+		if err := validResponse.VisitGetHealthResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
