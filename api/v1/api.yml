@@ -43,6 +43,11 @@ components:
       description: Идентификатор брони
 
   schemas:
+
+    # ──────────────────────────────────────────────────────────────
+    # Errors
+    # ──────────────────────────────────────────────────────────────
+
     ErrorResponse:
       type: object
       required: [error]
@@ -89,6 +94,36 @@ components:
           code: INTERNAL_ERROR
           message: internal server error
 
+    # ──────────────────────────────────────────────────────────────
+    # Requests
+    # ──────────────────────────────────────────────────────────────
+
+    UserRequest:
+      type: object
+      required: [username, email, password, confirmation]
+      properties:
+        username:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 128
+        confirmation:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 128
+
+    # ──────────────────────────────────────────────────────────────
+    # Responses
+    # ──────────────────────────────────────────────────────────────
+
     Token:
       type: object
       required: [token]
@@ -97,23 +132,21 @@ components:
           type: string
           description: JWT для заголовка Authorization Bearer
 
-    User:
+    UserResponse:
       type: object
-      required: [id, email, role]
+      required: [id, username, email, role]
       properties:
         id:
           type: string
           format: uuid
+        username:
+          type: string
         email:
           type: string
           format: email
         role:
           type: string
           enum: [admin, user]
-        createdAt:
-          type: string
-          format: date-time
-          nullable: true
 
     Room:
       type: object
@@ -221,7 +254,7 @@ components:
 
 paths:
   # ──────────────────────────────────────────────────────────────
-  # User
+  # Meta
   # ──────────────────────────────────────────────────────────────
   /health:
     get:
@@ -261,17 +294,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [email, password, role]
-              properties:
-                email:
-                  type: string
-                  format: email
-                password:
-                  type: string
-                role:
-                  type: string
-                  enum: [admin, user]
+              $ref: '#/components/schemas/UserRequest'
       responses:
         '201':
           description: Пользователь создан
@@ -281,7 +304,7 @@ paths:
                 type: object
                 properties:
                   user:
-                    $ref: '#/components/schemas/User'
+                    $ref: '#/components/schemas/UserResponse'
         '400':
           description: Неверный запрос или email уже занят
           content:

@@ -69,18 +69,18 @@ func (e ErrorResponseErrorCode) Valid() bool {
 	}
 }
 
-// Defines values for UserRole.
+// Defines values for UserResponseRole.
 const (
-	UserRoleAdmin UserRole = "admin"
-	UserRoleUser  UserRole = "user"
+	UserResponseRoleAdmin UserResponseRole = "admin"
+	UserResponseRoleUser  UserResponseRole = "user"
 )
 
-// Valid indicates whether the value is a known member of the UserRole enum.
-func (e UserRole) Valid() bool {
+// Valid indicates whether the value is a known member of the UserResponseRole enum.
+func (e UserResponseRole) Valid() bool {
 	switch e {
-	case UserRoleAdmin:
+	case UserResponseRoleAdmin:
 		return true
-	case UserRoleUser:
+	case UserResponseRoleUser:
 		return true
 	default:
 		return false
@@ -99,24 +99,6 @@ func (e PostAuthDummyLoginJSONBodyRole) Valid() bool {
 	case PostAuthDummyLoginJSONBodyRoleAdmin:
 		return true
 	case PostAuthDummyLoginJSONBodyRoleUser:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for PostUserRegisterJSONBodyRole.
-const (
-	PostUserRegisterJSONBodyRoleAdmin PostUserRegisterJSONBodyRole = "admin"
-	PostUserRegisterJSONBodyRoleUser  PostUserRegisterJSONBodyRole = "user"
-)
-
-// Valid indicates whether the value is a known member of the PostUserRegisterJSONBodyRole enum.
-func (e PostUserRegisterJSONBodyRole) Valid() bool {
-	switch e {
-	case PostUserRegisterJSONBodyRoleAdmin:
-		return true
-	case PostUserRegisterJSONBodyRoleUser:
 		return true
 	default:
 		return false
@@ -208,16 +190,24 @@ type Token struct {
 	Token string `json:"token"`
 }
 
-// User defines model for User.
-type User struct {
-	CreatedAt *time.Time          `json:"createdAt,omitempty"`
-	Email     openapi_types.Email `json:"email"`
-	Id        openapi_types.UUID  `json:"id"`
-	Role      UserRole            `json:"role"`
+// UserRequest defines model for UserRequest.
+type UserRequest struct {
+	Confirmation string              `json:"confirmation"`
+	Email        openapi_types.Email `json:"email"`
+	Password     string              `json:"password"`
+	Username     string              `json:"username"`
 }
 
-// UserRole defines model for User.Role.
-type UserRole string
+// UserResponse defines model for UserResponse.
+type UserResponse struct {
+	Email    openapi_types.Email `json:"email"`
+	Id       openapi_types.UUID  `json:"id"`
+	Role     UserResponseRole    `json:"role"`
+	Username string              `json:"username"`
+}
+
+// UserResponseRole defines model for UserResponse.Role.
+type UserResponseRole string
 
 // BookingIdPath defines model for BookingIdPath.
 type BookingIdPath = openapi_types.UUID
@@ -267,16 +257,6 @@ type GetRoomsRoomIdSlotsListParams struct {
 	Date openapi_types.Date `form:"date" json:"date"`
 }
 
-// PostUserRegisterJSONBody defines parameters for PostUserRegister.
-type PostUserRegisterJSONBody struct {
-	Email    openapi_types.Email          `json:"email"`
-	Password string                       `json:"password"`
-	Role     PostUserRegisterJSONBodyRole `json:"role"`
-}
-
-// PostUserRegisterJSONBodyRole defines parameters for PostUserRegister.
-type PostUserRegisterJSONBodyRole string
-
 // PostAuthDummyLoginJSONRequestBody defines body for PostAuthDummyLogin for application/json ContentType.
 type PostAuthDummyLoginJSONRequestBody PostAuthDummyLoginJSONBody
 
@@ -293,4 +273,4 @@ type PostRoomsCreateJSONRequestBody PostRoomsCreateJSONBody
 type PostRoomsRoomIdScheduleCreateJSONRequestBody = Schedule
 
 // PostUserRegisterJSONRequestBody defines body for PostUserRegister for application/json ContentType.
-type PostUserRegisterJSONRequestBody PostUserRegisterJSONBody
+type PostUserRegisterJSONRequestBody = UserRequest

@@ -1333,7 +1333,7 @@ type PostUserRegisterResponseObject interface {
 }
 
 type PostUserRegister201JSONResponse struct {
-	User *User `json:"user,omitempty"`
+	User *UserResponse `json:"user,omitempty"`
 }
 
 func (response PostUserRegister201JSONResponse) VisitPostUserRegisterResponse(w http.ResponseWriter) error {
