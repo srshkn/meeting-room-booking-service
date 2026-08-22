@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"mrb-service/internal/app"
 	"mrb-service/internal/config"
+	"mrb-service/internal/db"
 	"mrb-service/internal/logging"
 	"mrb-service/internal/postgres"
 )
@@ -45,7 +46,7 @@ func main() {
 	// -------------------------------------------------------------------------
 	// Database
 
-	pool, err := postgres.NewPool(ctx, cfg.Postgres)
+	pool, err := postgres.NewPool(ctx, cfg.DB)
 	if err != nil {
 		logger.Error(
 			"connect to PostgreSQL: %v",
@@ -55,5 +56,25 @@ func main() {
 	}
 	defer pool.Close()
 
-	fmt.Printf("Server: host: %s, port: %d", cfg.Server.Host, cfg.Server.Port)
+	queries := db.New(pool)
+
+	// -------------------------------------------------------------------------
+	// Server
+
+	serverApp := app.New(
+		cfg.Server,
+		logger,
+		queries,
+	)
+
+	// -------------------------------------------------------------------------
+	// Run
+
+	err = serverApp.Run(ctx)
+	if err != nil {
+		logger.Error(
+			"server stopped unexpectedly",
+			slog.Any("error", err),
+		)
+	}
 }
