@@ -6,18 +6,27 @@ import (
 	v1GenAPI "mrb-service/internal/generated/v1"
 )
 
-type RoomHandler struct{}
-
-func (h *RoomHandler) PostRoomsCreate(
-	ctx context.Context,
-	request v1GenAPI.PostRoomsCreateRequestObject,
-) (v1GenAPI.PostRoomsCreateResponseObject, error) {
-	return nil, nil
+type RoomHandler interface {
+	GetRoomsList(ctx context.Context, request v1GenAPI.GetRoomsListRequestObject) (v1GenAPI.GetRoomsListResponseObject, error)
+	PostRoomsCreate(ctx context.Context, request v1GenAPI.PostRoomsCreateRequestObject) (v1GenAPI.PostRoomsCreateResponseObject, error)
 }
 
-func (h *RoomHandler) GetRoomsList(
+type roomHandler struct{}
+
+func NewHandler() *roomHandler {
+	return &roomHandler{}
+}
+
+func (h *roomHandler) GetRoomsList(
 	ctx context.Context,
 	request v1GenAPI.GetRoomsListRequestObject,
 ) (v1GenAPI.GetRoomsListResponseObject, error) {
+	return nil, nil
+}
+
+func (h *roomHandler) PostRoomsCreate(
+	ctx context.Context,
+	request v1GenAPI.PostRoomsCreateRequestObject,
+) (v1GenAPI.PostRoomsCreateResponseObject, error) {
 	return nil, nil
 }

@@ -6,9 +6,17 @@ import (
 	v1GenAPI "mrb-service/internal/generated/v1"
 )
 
-type ScheduleHandler struct{}
+type ScheduleHandler interface {
+	PostRoomsRoomIdScheduleCreate(ctx context.Context, request v1GenAPI.PostRoomsRoomIdScheduleCreateRequestObject) (v1GenAPI.PostRoomsRoomIdScheduleCreateResponseObject, error)
+}
 
-func (h *ScheduleHandler) PostRoomsRoomIdScheduleCreate(
+type scheduleHandler struct{}
+
+func NewHandler() *scheduleHandler {
+	return &scheduleHandler{}
+}
+
+func (h *scheduleHandler) PostRoomsRoomIdScheduleCreate(
 	ctx context.Context,
 	request v1GenAPI.PostRoomsRoomIdScheduleCreateRequestObject,
 ) (v1GenAPI.PostRoomsRoomIdScheduleCreateResponseObject, error) {

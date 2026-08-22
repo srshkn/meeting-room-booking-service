@@ -6,13 +6,17 @@ import (
 	v1GenAPI "mrb-service/internal/generated/v1"
 )
 
-type MetaHandler struct{}
-
-func New() *MetaHandler {
-	return &MetaHandler{}
+type MetaHandler interface {
+	GetHealth(ctx context.Context, request v1GenAPI.GetHealthRequestObject) (v1GenAPI.GetHealthResponseObject, error)
 }
 
-func (h *MetaHandler) GetHealth(
+type metaHandler struct{}
+
+func NewHandler() *metaHandler {
+	return &metaHandler{}
+}
+
+func (h *metaHandler) GetHealth(
 	ctx context.Context,
 	request v1GenAPI.GetHealthRequestObject,
 ) (v1GenAPI.GetHealthResponseObject, error) {

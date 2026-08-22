@@ -6,16 +6,25 @@ import (
 	v1GenAPI "mrb-service/internal/generated/v1"
 )
 
-type AuthHandler struct{}
+type AuthHandler interface {
+	PostAuthDummyLogin(ctx context.Context, request v1GenAPI.PostAuthDummyLoginRequestObject) (v1GenAPI.PostAuthDummyLoginResponseObject, error)
+	PostAuthLogin(ctx context.Context, request v1GenAPI.PostAuthLoginRequestObject) (v1GenAPI.PostAuthLoginResponseObject, error)
+}
 
-func (h *AuthHandler) PostAuthDummyLogin(
+type authHandler struct{}
+
+func NewHandler() *authHandler {
+	return &authHandler{}
+}
+
+func (h *authHandler) PostAuthDummyLogin(
 	ctx context.Context,
 	request v1GenAPI.PostAuthDummyLoginRequestObject,
 ) (v1GenAPI.PostAuthDummyLoginResponseObject, error) {
 	return nil, nil
 }
 
-func (h *AuthHandler) PostAuthLogin(
+func (h *authHandler) PostAuthLogin(
 	ctx context.Context,
 	request v1GenAPI.PostAuthLoginRequestObject,
 ) (v1GenAPI.PostAuthLoginResponseObject, error) {

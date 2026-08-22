@@ -12,23 +12,23 @@ import (
 )
 
 type Handler struct {
-	*meta.MetaHandler
-	*user.UserHandler
-	*auth.AuthHandler
-	*room.RoomHandler
-	*schedule.ScheduleHandler
-	*slot.SlotHandler
-	*booking.BookingHandler
+	meta.MetaHandler
+	user.UserHandler
+	auth.AuthHandler
+	room.RoomHandler
+	schedule.ScheduleHandler
+	slot.SlotHandler
+	booking.BookingHandler
 }
 
-func New(
-	metaHandler *meta.MetaHandler,
-	userHandler *user.UserHandler,
-	authHandler *auth.AuthHandler,
-	roomHandler *room.RoomHandler,
-	scheduleHandler *schedule.ScheduleHandler,
-	slotHandler *slot.SlotHandler,
-	bookingHandler *booking.BookingHandler,
+func NewHandler(
+	metaHandler meta.MetaHandler,
+	userHandler user.UserHandler,
+	authHandler auth.AuthHandler,
+	roomHandler room.RoomHandler,
+	scheduleHandler schedule.ScheduleHandler,
+	slotHandler slot.SlotHandler,
+	bookingHandler booking.BookingHandler,
 ) *Handler {
 	return &Handler{
 		MetaHandler:     metaHandler,
