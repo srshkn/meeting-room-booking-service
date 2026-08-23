@@ -21,6 +21,7 @@ import (
 	"mrb-service/internal/domain/v1/user"
 	v1GenAPI "mrb-service/internal/generated/v1"
 	handlerApp "mrb-service/internal/http"
+	"mrb-service/internal/middleware"
 	"mrb-service/internal/swagger"
 )
 
@@ -49,7 +50,12 @@ func New(
 		booking.NewHandler(),
 	)
 
-	strictHandler := v1GenAPI.NewStrictHandler(v1Handler, nil)
+	strictHandler := v1GenAPI.NewStrictHandler(
+		v1Handler,
+		[]v1GenAPI.StrictMiddlewareFunc{
+			middleware.Logging(logger),
+		},
+	)
 
 	apiHandler := v1GenAPI.HandlerWithOptions(
 		strictHandler,
