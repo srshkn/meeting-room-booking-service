@@ -27,18 +27,28 @@ func (h *userHandler) PostUserRegister(
 ) (v1GenAPI.PostUserRegisterResponseObject, error) {
 	user, err := h.service.Registration(ctx, *request.Body)
 	if err != nil {
-		switch {
 
-		case errors.Is(err, ErrEmailAlreadyExists), errors.Is(err, ErrUsernameAlreadyExists):
+		switch {
+		case errors.Is(err, ErrEmptyUsername),
+			errors.Is(err, ErrLongUsername),
+			errors.Is(err, ErrEmptyEmail),
+			errors.Is(err, ErrLongEmail),
+			errors.Is(err, ErrEmptyPassword),
+			errors.Is(err, ErrShortPassword),
+			errors.Is(err, ErrLongPassword),
+			errors.Is(err, ErrPasswordsDoNotMatch),
+			errors.Is(err, ErrUsernameAlreadyExists),
+			errors.Is(err, ErrEmailAlreadyExists):
+
 			response := v1GenAPI.PostUserRegister400JSONResponse{}
 			response.Error.Code = v1GenAPI.INVALIDREQUEST
-			response.Error.Message = "invalid request"
+			response.Error.Message = err.Error()
 
 			return response, nil
 
 		default:
 			response := v1GenAPI.PostUserRegister500JSONResponse{}
-			response.Error.Code = "INTERNAL_ERROR"
+			response.Error.Code = string(v1GenAPI.INTERNALERROR) // "INTERNAL_ERROR"
 			response.Error.Message = "internal server error"
 
 			return response, nil

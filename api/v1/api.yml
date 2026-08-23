@@ -105,6 +105,7 @@ components:
         username:
           type: string
           minLength: 1
+          maxLength: 25
         email:
           type: string
           format: email
@@ -117,8 +118,6 @@ components:
         confirmation:
           type: string
           format: password
-          minLength: 8
-          maxLength: 128
 
     # ──────────────────────────────────────────────────────────────
     # Responses

@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"errors"
 	"strings"
 
 	"github.com/oapi-codegen/runtime/types"
@@ -26,60 +25,82 @@ func NewService(repo repository) *userService {
 	}
 }
 
-func (u *userService) validateCreateUser(
-	ctx context.Context,
-	username, rowEmail string,
+func (u *userService) validateRegistration(
+	username, email, password, confirmation string,
 ) error {
-	emailUser := strings.ToLower(rowEmail)
+	var err error
 
-	user, _ := u.repo.CheckUserExists(
-		ctx,
-		db.CheckUserExistsParams{
-			Username: username,
-			Email:    emailUser,
-		},
-	)
+	switch {
+	case username == "":
+		err = ErrEmptyUsername
 
-	if emailUser == user.Email {
-		return errors.New("a user with this email already exists")
+	case len([]rune(username)) > 25:
+		err = ErrLongUsername
+
+	case email == "":
+		err = ErrEmptyEmail
+
+	case len([]rune(email)) > 254:
+		err = ErrLongEmail
+
+	case password == "":
+		err = ErrEmptyPassword
+
+	case len([]rune(password)) < 8:
+		err = ErrShortPassword
+
+	case len([]rune(password)) > 128:
+		err = ErrLongPassword
+
+	case password != confirmation:
+		err = ErrPasswordsDoNotMatch
+
+	default:
+		err = nil
 	}
 
-	if username == user.Username {
-		return errors.New("a user with that username already exists")
-	}
-
-	return nil
+	return err
 }
 
 func (u *userService) Registration(
 	ctx context.Context,
 	body v1GenAPI.PostUserRegisterJSONRequestBody,
 ) (*v1GenAPI.UserResponse, error) {
-	if err := u.validateCreateUser(ctx, body.Username, string(body.Email)); err != nil {
-		return &v1GenAPI.UserResponse{}, err
+	username := strings.TrimSpace(body.Username)
+	email := strings.TrimSpace(strings.ToLower(string(body.Email)))
+	password := body.Password
+	confirmation := body.Confirmation
+
+	if err := u.validateRegistration(
+		username,
+		email,
+		password,
+		confirmation,
+	); err != nil {
+		return nil, err
 	}
 
-	hash, err := hash.Hash(body.Password)
+	passwordHash, err := hash.Hash(password)
 	if err != nil {
-		return &v1GenAPI.UserResponse{}, err
+		return nil, err
 	}
 
-	createUser, err := u.repo.CreateUser(
+	createdUser, err := u.repo.CreateUser(
 		ctx,
 		db.CreateUserParams{
-			Username:     body.Username,
-			Email:        strings.ToLower(string(body.Email)),
-			PasswordHash: hash,
+			Username:     username,
+			Email:        email,
+			PasswordHash: passwordHash,
 		},
 	)
 	if err != nil {
-		return &v1GenAPI.UserResponse{}, err
+		return nil, mapCreateUserError(err)
 	}
 
 	return &v1GenAPI.UserResponse{
-		Id:       createUser.ID,
-		Username: createUser.Username,
-		Email:    types.Email(createUser.Email),
-		Role:     v1GenAPI.UserResponseRole(createUser.Role),
+		Id:       createdUser.ID,
+		Username: createdUser.Username,
+		Email:    types.Email(createdUser.Email),
+		Role:     v1GenAPI.UserResponseRole(createdUser.Role),
 	}, nil
 }
