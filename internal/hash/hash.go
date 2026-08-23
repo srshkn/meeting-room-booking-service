@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -17,12 +16,6 @@ const (
 	parallelism uint8  = 4
 	saltLength         = 16
 	keyLength          = 32
-)
-
-var (
-	ErrInvalidHash        = errors.New("invalid password hash")
-	ErrUnsupportedHash    = errors.New("unsupported password hash")
-	ErrUnsupportedVersion = errors.New("unsupported argon2 version")
 )
 
 func Hash(password string) (string, error) {
@@ -66,7 +59,7 @@ type params struct {
 func Compare(password, encodedHash string) (bool, error) {
 	params, salt, expectedHash, err := decodeHash(encodedHash)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("compare password decode hash: %w", err)
 	}
 
 	actualHash := argon2.IDKey(
