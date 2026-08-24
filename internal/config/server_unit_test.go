@@ -8,12 +8,12 @@ import (
 func TestServerValidate(t *testing.T) {
 	tests := []struct {
 		name    string
-		server  ServerHTTP
+		server  server
 		wantErr bool
 	}{
 		{
 			name: "valid",
-			server: ServerHTTP{
+			server: server{
 				Host:            "localhost",
 				Port:            8080,
 				ShutdownTimeout: 5 * time.Second,
@@ -22,7 +22,7 @@ func TestServerValidate(t *testing.T) {
 		},
 		{
 			name: "empty host",
-			server: ServerHTTP{
+			server: server{
 				Port:            8080,
 				ShutdownTimeout: 5 * time.Second,
 			},
@@ -30,7 +30,7 @@ func TestServerValidate(t *testing.T) {
 		},
 		{
 			name: "port too low",
-			server: ServerHTTP{
+			server: server{
 				Host:            "localhost",
 				Port:            0,
 				ShutdownTimeout: 5 * time.Second,
@@ -39,7 +39,7 @@ func TestServerValidate(t *testing.T) {
 		},
 		{
 			name: "port too high",
-			server: ServerHTTP{
+			server: server{
 				Host:            "localhost",
 				Port:            65536,
 				ShutdownTimeout: 5 * time.Second,
@@ -48,7 +48,7 @@ func TestServerValidate(t *testing.T) {
 		},
 		{
 			name: "invalid shutdown timeout",
-			server: ServerHTTP{
+			server: server{
 				Host:            "localhost",
 				Port:            8080,
 				ShutdownTimeout: 0,

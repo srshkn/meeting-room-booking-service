@@ -44,7 +44,7 @@ func TestLogManagerValidate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			logger := LogManager{
+			logger := logger{
 				Format: tt.format,
 			}
 

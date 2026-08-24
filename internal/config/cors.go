@@ -21,30 +21,30 @@ type CORS interface {
 	GetallowCredentials() string
 }
 
-type CORScfg struct {
+type cors struct {
 	AllowedOrigins   []string `conf:"required"`
 	AllowedMethods   []string `conf:"required"`
 	AllowedHeaders   []string `conf:"required"`
 	AllowCredentials string   `conf:"required"`
 }
 
-func (c CORScfg) GetAllowedOrigins() []string {
+func (c cors) GetAllowedOrigins() []string {
 	return c.AllowedOrigins
 }
 
-func (c CORScfg) GetAllowedMethods() []string {
+func (c cors) GetAllowedMethods() []string {
 	return c.AllowedMethods
 }
 
-func (c CORScfg) GetAllowedHeaders() []string {
+func (c cors) GetAllowedHeaders() []string {
 	return c.AllowedHeaders
 }
 
-func (c CORScfg) GetallowCredentials() string {
+func (c cors) GetallowCredentials() string {
 	return c.AllowCredentials
 }
 
-func (c CORScfg) validate() error {
+func (c cors) validate() error {
 	for _, origin := range c.AllowedOrigins {
 		if origin == "" {
 			return errors.New("CORS origin cannot be empty")

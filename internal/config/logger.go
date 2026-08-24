@@ -12,15 +12,15 @@ type Logger interface {
 	GetFormat() string
 }
 
-type LogManager struct {
+type logger struct {
 	Format string `conf:"required"`
 }
 
-func (l LogManager) GetFormat() string {
+func (l logger) GetFormat() string {
 	return l.Format
 }
 
-func (l LogManager) validate() error {
+func (l logger) validate() error {
 
 	if l.Format != "dev" && l.Format != "local" && l.Format != "prod" {
 		return fmt.Errorf(

@@ -17,25 +17,25 @@ type Server interface {
 	GetShutdownTimeout() time.Duration
 }
 
-type ServerHTTP struct {
+type server struct {
 	Host            string        `conf:"required"`
 	Port            int           `conf:"required"`
 	ShutdownTimeout time.Duration `conf:"required"`
 }
 
-func (s ServerHTTP) GetHost() string {
+func (s server) GetHost() string {
 	return s.Host
 }
 
-func (s ServerHTTP) GetPort() int {
+func (s server) GetPort() int {
 	return s.Port
 }
 
-func (s ServerHTTP) GetShutdownTimeout() time.Duration {
+func (s server) GetShutdownTimeout() time.Duration {
 	return s.ShutdownTimeout
 }
 
-func (s ServerHTTP) validate() error {
+func (s server) validate() error {
 	switch {
 
 	case s.Host == "":

@@ -8,12 +8,12 @@ import (
 func TestCORScfgValidate(t *testing.T) {
 	tests := []struct {
 		name    string
-		cfg     CORScfg
+		cfg     cors
 		wantErr string
 	}{
 		{
 			name: "valid config",
-			cfg: CORScfg{
+			cfg: cors{
 				AllowedOrigins:   []string{"http://localhost:3000", "https://example.com"},
 				AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 				AllowedHeaders:   []string{"Content-Type", "Authorization"},
@@ -22,7 +22,7 @@ func TestCORScfgValidate(t *testing.T) {
 		},
 		{
 			name: "valid credentials false",
-			cfg: CORScfg{
+			cfg: cors{
 				AllowedOrigins:   []string{"http://localhost"},
 				AllowedMethods:   []string{"GET"},
 				AllowedHeaders:   []string{"Content-Type"},
@@ -31,7 +31,7 @@ func TestCORScfgValidate(t *testing.T) {
 		},
 		{
 			name: "method with spaces is valid",
-			cfg: CORScfg{
+			cfg: cors{
 				AllowedOrigins:   []string{"http://localhost"},
 				AllowedMethods:   []string{" GET ", " POST "},
 				AllowedHeaders:   []string{" Content-Type "},
@@ -40,7 +40,7 @@ func TestCORScfgValidate(t *testing.T) {
 		},
 		{
 			name: "empty origin",
-			cfg: CORScfg{
+			cfg: cors{
 				AllowedOrigins:   []string{""},
 				AllowedMethods:   []string{"GET"},
 				AllowedHeaders:   []string{"Content-Type"},
@@ -50,7 +50,7 @@ func TestCORScfgValidate(t *testing.T) {
 		},
 		{
 			name: "invalid origin URL",
-			cfg: CORScfg{
+			cfg: cors{
 				AllowedOrigins:   []string{"://localhost"},
 				AllowedMethods:   []string{"GET"},
 				AllowedHeaders:   []string{"Content-Type"},
@@ -60,7 +60,7 @@ func TestCORScfgValidate(t *testing.T) {
 		},
 		{
 			name: "invalid origin scheme",
-			cfg: CORScfg{
+			cfg: cors{
 				AllowedOrigins:   []string{"ftp://localhost"},
 				AllowedMethods:   []string{"GET"},
 				AllowedHeaders:   []string{"Content-Type"},
@@ -70,7 +70,7 @@ func TestCORScfgValidate(t *testing.T) {
 		},
 		{
 			name: "origin without host",
-			cfg: CORScfg{
+			cfg: cors{
 				AllowedOrigins:   []string{"http:localhost"},
 				AllowedMethods:   []string{"GET"},
 				AllowedHeaders:   []string{"Content-Type"},
@@ -80,7 +80,7 @@ func TestCORScfgValidate(t *testing.T) {
 		},
 		{
 			name: "invalid method",
-			cfg: CORScfg{
+			cfg: cors{
 				AllowedOrigins:   []string{"http://localhost"},
 				AllowedMethods:   []string{"TRACE"},
 				AllowedHeaders:   []string{"Content-Type"},
@@ -90,7 +90,7 @@ func TestCORScfgValidate(t *testing.T) {
 		},
 		{
 			name: "empty header",
-			cfg: CORScfg{
+			cfg: cors{
 				AllowedOrigins:   []string{"http://localhost"},
 				AllowedMethods:   []string{"GET"},
 				AllowedHeaders:   []string{"   "},
@@ -100,7 +100,7 @@ func TestCORScfgValidate(t *testing.T) {
 		},
 		{
 			name: "invalid credentials",
-			cfg: CORScfg{
+			cfg: cors{
 				AllowedOrigins:   []string{"http://localhost"},
 				AllowedMethods:   []string{"GET"},
 				AllowedHeaders:   []string{"Content-Type"},

@@ -27,7 +27,7 @@ type Database interface {
 	GetMaxConnIdleTime() time.Duration
 }
 
-type DB struct {
+type db struct {
 	Host     string `conf:"required"`
 	Port     int    `conf:"required"`
 	User     string `conf:"required"`
@@ -40,7 +40,7 @@ type DB struct {
 	MaxConnIdleTime time.Duration `conf:"required"`
 }
 
-func (p DB) GetURL() string {
+func (p db) GetURL() string {
 	databaseURL := url.URL{
 		Scheme: "postgres",
 		User:   url.UserPassword(p.User, p.Password),
@@ -55,23 +55,23 @@ func (p DB) GetURL() string {
 	return databaseURL.String()
 }
 
-func (p DB) GetMaxOpenConns() int32 {
+func (p db) GetMaxOpenConns() int32 {
 	return p.MaxOpenConns
 }
 
-func (p DB) GetMinOpenConns() int32 {
+func (p db) GetMinOpenConns() int32 {
 	return p.MinOpenConns
 }
 
-func (p DB) GetConnMaxLifetime() time.Duration {
+func (p db) GetConnMaxLifetime() time.Duration {
 	return p.ConnMaxLifetime
 }
 
-func (p DB) GetMaxConnIdleTime() time.Duration {
+func (p db) GetMaxConnIdleTime() time.Duration {
 	return p.MaxConnIdleTime
 }
 
-func (p DB) validate() error {
+func (p db) validate() error {
 	switch {
 
 	case p.Host == "":
