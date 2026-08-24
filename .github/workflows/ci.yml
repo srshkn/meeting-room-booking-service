@@ -118,7 +118,7 @@ jobs:
 
 
   checks-compose:
-    needs: checks-dockerfile
+    # needs: checks-dockerfile
     runs-on: ubuntu-latest
 
     env:
@@ -140,8 +140,8 @@ jobs:
       DB_CONN_MAX_LIFETIME: ${{ secrets.TEST_DB_CONN_MAX_LIFETIME }}
       DB_MAX_CONN_IDLE_TIME: ${{ secrets.TEST_DB_MAX_CONN_IDLE_TIME }}
 
-      JWT_PATH_PRIVATE_KEY: "${{ github.workspace }}/${{ secrets.TEST_JWT_PATH_PRIVATE_KEY }}"
-      JWT_PATH_PUBLIC_KEY: "${{ github.workspace }}/${{ secrets.TEST_JWT_PATH_PUBLIC_KEY }}"
+      JWT_PATH_PRIVATE_KEY: "${{ secrets.TEST_JWT_PATH_PRIVATE_KEY }}"
+      JWT_PATH_PUBLIC_KEY: "${{ secrets.TEST_JWT_PATH_PUBLIC_KEY }}"
 
       JWT_ACCESS_EXPIRES: ${{ secrets.TEST_JWT_ACCESS_EXPIRES }}
       JWT_REFRESH_EXPIRES: ${{ secrets.TEST_JWT_REFRESH_EXPIRES }}
