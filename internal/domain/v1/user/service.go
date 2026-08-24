@@ -8,7 +8,7 @@ import (
 
 	"mrb-service/internal/db"
 	v1GenAPI "mrb-service/internal/generated/v1"
-	"mrb-service/internal/hash"
+	"mrb-service/internal/password"
 )
 
 type UserService interface {
@@ -26,7 +26,7 @@ func NewService(repo repository) *userService {
 }
 
 func (u *userService) validateRegistration(
-	username, email, password, confirmation string,
+	username, email, passwordRow, confirmation string,
 ) error {
 	var err error
 
@@ -43,16 +43,16 @@ func (u *userService) validateRegistration(
 	case len([]rune(email)) > 254:
 		err = ErrLongEmail
 
-	case password == "":
+	case passwordRow == "":
 		err = ErrEmptyPassword
 
-	case len([]rune(password)) < 8:
+	case len([]rune(passwordRow)) < 8:
 		err = ErrShortPassword
 
-	case len([]rune(password)) > 128:
+	case len([]rune(passwordRow)) > 128:
 		err = ErrLongPassword
 
-	case password != confirmation:
+	case passwordRow != confirmation:
 		err = ErrPasswordsDoNotMatch
 
 	default:
@@ -68,19 +68,19 @@ func (u *userService) Registration(
 ) (*v1GenAPI.UserResponse, error) {
 	username := strings.TrimSpace(body.Username)
 	email := strings.TrimSpace(strings.ToLower(string(body.Email)))
-	password := body.Password
+	passwordRow := body.Password
 	confirmation := body.Confirmation
 
 	if err := u.validateRegistration(
 		username,
 		email,
-		password,
+		passwordRow,
 		confirmation,
 	); err != nil {
 		return nil, err
 	}
 
-	passwordHash, err := hash.Hash(password)
+	passwordHash, err := password.Hash(passwordRow)
 	if err != nil {
 		return nil, err
 	}
