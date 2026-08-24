@@ -8,5 +8,4 @@ import (
 
 type repository interface {
 	CreateUser(ctx context.Context, arg db.CreateUserParams) (db.CreateUserRow, error)
-	CheckUserExists(ctx context.Context, arg db.CheckUserExistsParams) (db.CheckUserExistsRow, error)
 }
