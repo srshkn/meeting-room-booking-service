@@ -29,9 +29,42 @@ jobs:
       TEST_SERVER_PORT: ${{ secrets.TEST_SERVER_PORT }}
       TEST_SERVER_SHOTDOWN_TIMEOUT: ${{ secrets.TEST_SERVER_SHUTDOWN_TIMEOUT }}
 
+      TEST_LOGGER_FORMAT: ${{ secrets.TEST_LOGGER_FORMAT }}
+
+      TEST_DB_HOST: ${{ secrets.TEST_DB_HOST }}
+      TEST_DB_PORT: ${{ secrets.TEST_DB_PORT }}
+      TEST_DB_USER: ${{ secrets.TEST_DB_USER }}
+      TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+      TEST_DB_NAME: ${{ secrets.TEST_DB_NAME }}
+      TEST_DB_MAX_OPEN_CONNS: ${{ secrets.TEST_DB_MAX_OPEN_CONNS }}
+      TEST_DB_MIN_OPEN_CONNS: ${{ secrets.TEST_DB_MIN_OPEN_CONNS }}
+      TEST_DB_CONN_MAX_LIFETIME: ${{ secrets.TEST_DB_CONN_MAX_LIFETIME }}
+      TEST_DB_MAX_CONN_IDLE_TIME: ${{ secrets.TEST_DB_MAX_CONN_IDLE_TIME }}
+
+      JWT_PATH_PRIVATE_KEY: "${{ github.workspace }}/${{ secrets.TEST_JWT_PATH_PRIVATE_KEY }}"
+      JWT_PATH_PUBLIC_KEY: "${{ github.workspace }}/${{ secrets.TEST_JWT_PATH_PUBLIC_KEY }}"
+
+      TEST_JWT_ACCESS_EXPIRES: ${{ secrets.TEST_JWT_ACCESS_EXPIRES }}
+      TEST_JWT_REFRESH_EXPIRES: ${{ secrets.TEST_JWT_REFRESH_EXPIRES }}
+      TEST_JWT_ISSUER: ${{ secrets.TEST_JWT_ISSUER }}
+      TEST_JWT_AUDIENCE: ${{ secrets.TEST_JWT_AUDIENCE }}
+
+      TEST_CORS_ALLOWED_ORIGINS: ${{ secrets.TEST_CORS_ALLOWED_ORIGINS }}
+      TEST_CORS_ALLOWED_METHODS: ${{ secrets.TEST_CORS_ALLOWED_METHODS }}
+      TEST_CORS_ALLOWED_HEADERS: ${{ secrets.TEST_CORS_ALLOWED_HEADERS }}
+      TEST_CORS_ALLOW_CREDENTIALS: ${{ secrets.TEST_CORS_ALLOW_CREDENTIALS }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Create JWT keys
+        run: |
+          mkdir -p "$(dirname "$JWT_PATH_PRIVATE_KEY")"
+          mkdir -p "$(dirname "$JWT_PATH_PUBLIC_KEY")"
+
+          printf '%s\n' "${{ secrets.TEST_JWT_PRIVATE_KEY }}" > "$JWT_PATH_PRIVATE_KEY"
+          printf '%s\n' "${{ secrets.TEST_JWT_PUBLIC_KEY }}" > "$JWT_PATH_PUBLIC_KEY"
 
       - name: Setup Go
         uses: actions/setup-go@v7
