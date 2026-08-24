@@ -19,11 +19,17 @@ import (
 	"mrb-service/internal/domain/v1/schedule"
 	"mrb-service/internal/domain/v1/slot"
 	"mrb-service/internal/domain/v1/user"
-	v1GenAPI "mrb-service/internal/generated/v1"
-	handlerApp "mrb-service/internal/http"
 	"mrb-service/internal/middleware"
 	"mrb-service/internal/swagger"
+
+	v1GenAPI "mrb-service/internal/generated/v1"
+	handlerApp "mrb-service/internal/http"
 )
+
+type ServerApp interface {
+	Run(ctx context.Context) error
+	Handler() http.Handler
+}
 
 type serverApp struct {
 	httpServer      *http.Server
