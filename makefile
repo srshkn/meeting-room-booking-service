@@ -30,6 +30,8 @@ DEV=infra/compose/dev.yml
 # JWT
 PRIVATE_KEY=./secrets/private.pem
 PUBLIC_KEY=./secrets/public.pem
+TEST_PRIVATE_KEY=./secrets/test-private.pem
+TEST_PUBLIC_KEY=./secrets/test-public.pem
 
 # -------------------------------------------------------------------------
 # PHONY
@@ -38,7 +40,7 @@ PUBLIC_KEY=./secrets/public.pem
 .PHONY: help
 
 # Generation
-.PHONY: env-gen v1api-gen jwt-keys-gen
+.PHONY: env-gen v1api-gen jwt-keys-gen jwt-keys-test-gen
 
 # Migrations
 .PHONY: migrate-create migrate-up migrate-down migrate-version
@@ -96,6 +98,17 @@ jwt-keys-gen:
 		mkdir -p secrets; \
 		openssl genrsa -out $(PRIVATE_KEY) 2048; \
 		openssl rsa -in $(PRIVATE_KEY) -pubout -out $(PUBLIC_KEY); \
+		echo "JWT keys generated in ./secrets"; \
+	fi
+
+jwt-keys-test-gen:
+	@if [ -f $(TEST_PRIVATE_KEY) ] && [ -f $(TEST_PUBLIC_KEY) ]; then \
+		echo "JWT keys already exist. Skipping generation."; \
+	else \
+		echo "Generating JWT RS256 keys..."; \
+		mkdir -p secrets; \
+		openssl genrsa -out $(TEST_PRIVATE_KEY) 2048; \
+		openssl rsa -in $(TEST_PRIVATE_KEY) -pubout -out $(TEST_PUBLIC_KEY); \
 		echo "JWT keys generated in ./secrets"; \
 	fi
 
