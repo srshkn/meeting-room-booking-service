@@ -3,9 +3,10 @@ package middleware
 import (
 	"context"
 	"log/slog"
-	v1GenAPI "mrb-service/internal/generated/v1"
 	"net/http"
 	"time"
+
+	v1GenAPI "mrb-service/internal/generated/v1"
 )
 
 func Logging(logger *slog.Logger) v1GenAPI.StrictMiddlewareFunc {

@@ -17,6 +17,7 @@ type config struct {
 	Server *ServerHTTP
 	DB     *DB
 	Logger *LogManager
+	CORS   *CORScfg
 }
 
 func New() (*config, string, error) {
@@ -43,6 +44,10 @@ func New() (*config, string, error) {
 
 	if err := cfg.DB.validate(); err != nil {
 		return &config{}, "", fmt.Errorf("validate config Postgers: %w", err)
+	}
+
+	if err := cfg.CORS.validate(); err != nil {
+		return &config{}, "", fmt.Errorf("validate config CORS: %w", err)
 	}
 
 	return &cfg, "", nil
