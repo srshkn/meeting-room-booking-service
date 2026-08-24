@@ -27,6 +27,10 @@ DATABASE_URL = postgres://$(DB_USER):$(DB_PASSWORD)@$(MIGRATION_DB_HOST):$(MIGRA
 BASE=compose.yml
 DEV=infra/compose/dev.yml
 
+# JWT
+PRIVATE_KEY=./secrets/private.pem
+PUBLIC_KEY=./secrets/public.pem
+
 # -------------------------------------------------------------------------
 # PHONY
 
@@ -34,7 +38,7 @@ DEV=infra/compose/dev.yml
 .PHONY: help
 
 # Generation
-.PHONY: env-gen v1api-gen
+.PHONY: env-gen v1api-gen jwt-keys-gen
 
 # Migrations
 .PHONY: migrate-create migrate-up migrate-down migrate-version
@@ -55,6 +59,7 @@ help:
 	@echo "  env-gen              Create .env from .env.example"
 	@echo "  v1api-gen            Generate Go code from OpenAPI specification"
 	@echo "  sql-gen              Generate Go code from SQL queries"
+	@echo "  jwt-keys-gen              Generate JWT RSA keys"
 	@echo ""
 	@echo "Migrations:"
 	@echo "  migrate-create       Create a new migration (name=<migration_name>)"
@@ -82,6 +87,17 @@ v1api-gen:
 
 sql-gen:
 	sqlc generate
+
+jwt-keys-gen:
+	@if [ -f $(PRIVATE_KEY) ] && [ -f $(PUBLIC_KEY) ]; then \
+		echo "JWT keys already exist. Skipping generation."; \
+	else \
+		echo "Generating JWT RS256 keys..."; \
+		mkdir -p secrets; \
+		openssl genrsa -out $(PRIVATE_KEY) 2048; \
+		openssl rsa -in $(PRIVATE_KEY) -pubout -out $(PUBLIC_KEY); \
+		echo "JWT keys generated in ./secrets"; \
+	fi
 
 # -------------------------------------------------------------------------
 # MIGRATIONS

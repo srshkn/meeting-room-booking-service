@@ -18,6 +18,7 @@ type config struct {
 	DB     *DB
 	Logger *LogManager
 	CORS   *CORScfg
+	JWT    *jwt
 }
 
 func New() (*config, string, error) {
@@ -48,6 +49,14 @@ func New() (*config, string, error) {
 
 	if err := cfg.CORS.validate(); err != nil {
 		return &config{}, "", fmt.Errorf("validate config CORS: %w", err)
+	}
+
+	if err := cfg.JWT.loadKeys(); err != nil {
+		return &config{}, "", fmt.Errorf("load keys JWT: %w", err)
+	}
+
+	if err := cfg.JWT.validate(); err != nil {
+		return &config{}, "", fmt.Errorf("validate config JWT: %w", err)
 	}
 
 	return &cfg, "", nil
