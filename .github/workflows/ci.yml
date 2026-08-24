@@ -166,11 +166,13 @@ jobs:
 
       - name: Create JWT keys
         run: |
-          mkdir -p "$(dirname "$JWT_PATH_PRIVATE_KEY")"
-          mkdir -p "$(dirname "$JWT_PATH_PUBLIC_KEY")"
+          mkdir -p ./secrets
 
-          printf '%s\n' "${{ secrets.TEST_JWT_PRIVATE_KEY }}" > "$JWT_PATH_PRIVATE_KEY"
-          printf '%s\n' "${{ secrets.TEST_JWT_PUBLIC_KEY }}" > "$JWT_PATH_PUBLIC_KEY"
+              printf '%s\n' "${{ secrets.TEST_JWT_PRIVATE_KEY }}" \
+                > ./secrets/test-private.pem
+
+              printf '%s\n' "${{ secrets.TEST_JWT_PUBLIC_KEY }}" \
+                > ./secrets/test-public.pem
 
       - name: Validate Compose
         run: |
