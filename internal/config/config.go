@@ -19,6 +19,7 @@ type config struct {
 	Logger *logger
 	CORS   *cors
 	JWT    *jwt
+	Cookie *cookie
 }
 
 func New() (*config, string, error) {
@@ -47,16 +48,24 @@ func New() (*config, string, error) {
 		return nil, "", fmt.Errorf("validate config Postgers: %w", err)
 	}
 
-	if err := cfg.CORS.validate(); err != nil {
-		return nil, "", fmt.Errorf("validate config CORS: %w", err)
-	}
-
 	if err := cfg.JWT.loadKeys(); err != nil {
 		return nil, "", fmt.Errorf("load keys JWT: %w", err)
 	}
 
 	if err := cfg.JWT.validate(); err != nil {
 		return nil, "", fmt.Errorf("validate config JWT: %w", err)
+	}
+
+	if err := cfg.Cookie.parseSameSite(); err != nil {
+		return nil, "", fmt.Errorf("parse SameSite cookie: %w", err)
+	}
+
+	if err := cfg.Cookie.validate(); err != nil {
+		return nil, "", fmt.Errorf("validate config Cookie: %w", err)
+	}
+
+	if err := cfg.CORS.validate(); err != nil {
+		return nil, "", fmt.Errorf("validate config CORS: %w", err)
 	}
 
 	return &cfg, "", nil
