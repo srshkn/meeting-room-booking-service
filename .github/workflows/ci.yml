@@ -191,7 +191,7 @@ jobs:
       - name: Check health
         run: |
           for attempt in {1..30}; do
-            if curl --fail --silent http://${SERVER_HOST}:${SERVER_PORT}/health; then
+            if curl --fail --silent http://127.0.0.1:${SERVER_PORT}/health; then
               exit 0
             fi
 
