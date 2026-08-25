@@ -30,7 +30,40 @@ func (h *authHandler) PostAuthDummyLogin(
 	ctx context.Context,
 	request v1GenAPI.PostAuthDummyLoginRequestObject,
 ) (v1GenAPI.PostAuthDummyLoginResponseObject, error) {
-	return nil, nil
+	token, refreshToken, err := h.service.LoginDummy(ctx, *request.Body)
+	if err != nil {
+
+		switch {
+		case errors.Is(err, ErrIncorrectPassword),
+			errors.Is(err, ErrUserNotFound),
+			errors.Is(err, ErrEmptyEmail),
+			errors.Is(err, ErrLongEmail),
+			errors.Is(err, ErrEmptyPassword),
+			errors.Is(err, ErrShortPassword),
+			errors.Is(err, ErrLongPassword):
+
+			response := v1GenAPI.PostAuthDummyLogin400JSONResponse{}
+			response.Error.Code = v1GenAPI.UNAUTHORIZED
+			response.Error.Message = err.Error()
+
+			return response, nil
+
+		default:
+			response := v1GenAPI.PostAuthDummyLogin500JSONResponse{}
+			response.Error.Code = string(v1GenAPI.INTERNALERROR) // "INTERNAL_ERROR"
+			response.Error.Message = "internal server error"
+
+			return response, nil
+		}
+	}
+	return v1GenAPI.PostAuthDummyLogin200JSONResponse{
+		Body: v1GenAPI.Token{
+			Token: token.Token,
+		},
+		Headers: v1GenAPI.PostAuthDummyLogin200ResponseHeaders{
+			SetCookie: h.cookie.SetRefreshToken(refreshToken.Token, refreshToken.ExpiresAt),
+		},
+	}, nil
 }
 
 func (h *authHandler) PostAuthLogin(

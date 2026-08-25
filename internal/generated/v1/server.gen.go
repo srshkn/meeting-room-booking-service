@@ -553,15 +553,23 @@ type PostAuthDummyLoginResponseObject interface {
 	VisitPostAuthDummyLoginResponse(w http.ResponseWriter) error
 }
 
-type PostAuthDummyLogin200JSONResponse Token
+type PostAuthDummyLogin200ResponseHeaders struct {
+	SetCookie string
+}
+
+type PostAuthDummyLogin200JSONResponse struct {
+	Body    Token
+	Headers PostAuthDummyLogin200ResponseHeaders
+}
 
 func (response PostAuthDummyLogin200JSONResponse) VisitPostAuthDummyLoginResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
 		return err
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Set-Cookie", fmt.Sprint(response.Headers.SetCookie))
 	w.WriteHeader(200)
 	_, err := buf.WriteTo(w)
 	return err

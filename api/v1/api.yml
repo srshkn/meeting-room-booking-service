@@ -391,6 +391,11 @@ paths:
       responses:
         '200':
           description: Тестовый токен
+          headers:
+            Set-Cookie:
+              required: true
+              schema:
+                type: string
           content:
             application/json:
               schema:

@@ -13,10 +13,19 @@ import (
 	v1GenAPI "mrb-service/internal/generated/v1"
 )
 
+var (
+	dummyUserID  = uuid.MustParse("01a02084-0c80-7a11-8a11-111111111111")
+	dummyAdminID = uuid.MustParse("01a02084-0c80-7a22-8a22-222222222222")
+)
+
 type AuthService interface {
 	Login(
 		ctx context.Context,
 		body v1GenAPI.PostAuthLoginJSONRequestBody,
+	) (*v1GenAPI.Token, jwt.RefreshToken, error)
+	LoginDummy(
+		ctx context.Context,
+		body v1GenAPI.PostAuthDummyLoginJSONRequestBody,
 	) (*v1GenAPI.Token, jwt.RefreshToken, error)
 }
 
@@ -33,6 +42,34 @@ func NewService(repo repository, jwt jwt.JWTManager) *authService {
 }
 
 func (s *authService) validateLogin(
+	email, passwordRow string,
+) error {
+	var err error
+
+	switch {
+	case email == "":
+		err = ErrEmptyEmail
+
+	case len([]rune(email)) > 254:
+		err = ErrLongEmail
+
+	case passwordRow == "":
+		err = ErrEmptyPassword
+
+	case len([]rune(passwordRow)) < 8:
+		err = ErrShortPassword
+
+	case len([]rune(passwordRow)) > 128:
+		err = ErrLongPassword
+
+	default:
+		err = nil
+	}
+
+	return err
+}
+
+func (s *authService) validateLoginDummy(
 	email, passwordRow string,
 ) error {
 	var err error
@@ -81,6 +118,33 @@ func (s *authService) Login(
 	if ok, err := password.Compare(passwordRow, user.PasswordHash); !ok {
 		return nil, refreshToken, ErrIncorrectPassword
 	} else if err != nil {
+		return nil, refreshToken, err
+	}
+
+	return s.issueTokens(ctx, user.ID)
+}
+
+func (s *authService) LoginDummy(
+	ctx context.Context,
+	body v1GenAPI.PostAuthDummyLoginJSONRequestBody,
+) (*v1GenAPI.Token, jwt.RefreshToken, error) {
+	var refreshToken jwt.RefreshToken
+	var id uuid.UUID
+
+	role := body.Role
+
+	if !role.Valid() {
+		return nil, refreshToken, ErrIncorrectPassword //
+	}
+
+	if role == v1GenAPI.PostAuthDummyLoginJSONBodyRoleAdmin {
+		id = dummyUserID
+	} else {
+		id = dummyAdminID
+	}
+
+	user, err := s.repo.GetUserByID(ctx, id)
+	if err != nil {
 		return nil, refreshToken, err
 	}
 
