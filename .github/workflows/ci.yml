@@ -118,7 +118,7 @@ jobs:
 
 
   checks-compose:
-    # needs: checks-dockerfile
+    needs: checks-dockerfile
     runs-on: ubuntu-latest
 
     env:
