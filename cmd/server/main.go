@@ -9,7 +9,9 @@ import (
 
 	"mrb-service/internal/app"
 	"mrb-service/internal/config"
+	"mrb-service/internal/cookie"
 	"mrb-service/internal/db"
+	"mrb-service/internal/jwt"
 	"mrb-service/internal/logging"
 	"mrb-service/internal/postgres"
 )
@@ -44,6 +46,16 @@ func main() {
 	logger := logging.New(cfg.Logger)
 
 	// -------------------------------------------------------------------------
+	// JWT
+
+	jwtMAnager := jwt.New(cfg.JWT)
+
+	// -------------------------------------------------------------------------
+	// Cookie manager
+
+	cookieManager := cookie.New(cfg.Cookie)
+
+	// -------------------------------------------------------------------------
 	// Database
 
 	pool, err := postgres.NewPool(ctx, cfg.DB)
@@ -65,6 +77,8 @@ func main() {
 		cfg.Server,
 		logger,
 		queries,
+		jwtMAnager,
+		cookieManager,
 		cfg.CORS,
 	)
 

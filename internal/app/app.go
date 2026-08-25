@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"mrb-service/internal/config"
+	"mrb-service/internal/cookie"
 	"mrb-service/internal/db"
 	"mrb-service/internal/domain/v1/auth"
 	"mrb-service/internal/domain/v1/booking"
@@ -19,11 +20,12 @@ import (
 	"mrb-service/internal/domain/v1/schedule"
 	"mrb-service/internal/domain/v1/slot"
 	"mrb-service/internal/domain/v1/user"
+	"mrb-service/internal/jwt"
 	"mrb-service/internal/middleware"
 	"mrb-service/internal/swagger"
 
 	v1GenAPI "mrb-service/internal/generated/v1"
-	handlerApp "mrb-service/internal/http"
+	handlerApp "mrb-service/internal/handler"
 )
 
 type ServerApp interface {
@@ -41,16 +43,19 @@ func New(
 	cfg config.Server,
 	logger *slog.Logger,
 	db db.Querier,
+	jwtManager jwt.JWTManager,
+	cookieManager cookie.Auth,
 	cors config.CORS,
 ) *serverApp {
 	mux := http.NewServeMux()
 
 	userService := user.NewService(db)
+	authService := auth.NewService(db, jwtManager)
 
 	v1Handler := handlerApp.NewHandler(
 		meta.NewHandler(),
 		user.NewHandler(userService),
-		auth.NewHandler(),
+		auth.NewHandler(authService, cookieManager),
 		room.NewHandler(),
 		schedule.NewHandler(),
 		slot.NewHandler(),

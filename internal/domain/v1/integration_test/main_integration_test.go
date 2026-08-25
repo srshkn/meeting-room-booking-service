@@ -9,6 +9,7 @@ import (
 
 	"mrb-service/internal/app"
 	"mrb-service/internal/config"
+	"mrb-service/internal/cookie"
 	"mrb-service/internal/db"
 	"mrb-service/internal/jwt"
 	"mrb-service/internal/logging"
@@ -59,6 +60,11 @@ func TestMain(m *testing.M) {
 	// JWT
 
 	testJWTManager = jwt.New(cfg.JWT)
+
+	// -------------------------------------------------------------------------
+	// Cookie manager
+
+	cookieManager := cookie.New(cfg.Cookie)
 
 	// -------------------------------------------------------------------------
 	// CORSCfg
@@ -120,6 +126,8 @@ func TestMain(m *testing.M) {
 		cfg.Server,
 		testLogger,
 		testDB,
+		testJWTManager,
+		cookieManager,
 		testCORS,
 	)
 

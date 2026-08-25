@@ -603,15 +603,23 @@ type PostAuthLoginResponseObject interface {
 	VisitPostAuthLoginResponse(w http.ResponseWriter) error
 }
 
-type PostAuthLogin200JSONResponse Token
+type PostAuthLogin200ResponseHeaders struct {
+	SetCookie string
+}
+
+type PostAuthLogin200JSONResponse struct {
+	Body    Token
+	Headers PostAuthLogin200ResponseHeaders
+}
 
 func (response PostAuthLogin200JSONResponse) VisitPostAuthLoginResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
 		return err
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Set-Cookie", fmt.Sprint(response.Headers.SetCookie))
 	w.WriteHeader(200)
 	_, err := buf.WriteTo(w)
 	return err
