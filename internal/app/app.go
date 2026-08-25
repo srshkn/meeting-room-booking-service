@@ -43,7 +43,7 @@ func New(
 	cfg config.Server,
 	logger *slog.Logger,
 	db db.Querier,
-	jwtManager jwt.JWTManager,
+	jwtManager jwt.Manager,
 	cookieManager cookie.Auth,
 	cors config.CORS,
 ) *serverApp {
@@ -65,6 +65,7 @@ func New(
 	strictHandler := v1GenAPI.NewStrictHandler(
 		v1Handler,
 		[]v1GenAPI.StrictMiddlewareFunc{
+			middleware.Auth(logger, jwtManager),
 			middleware.Logging(logger),
 		},
 	)

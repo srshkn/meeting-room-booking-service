@@ -20,7 +20,7 @@ var (
 	testServerApp  app.ServerApp
 	testLogger     *slog.Logger
 	testDB         db.Querier
-	testJWTManager jwt.JWTManager
+	testJWTManager jwt.Manager
 	testCORS       config.CORS
 	testHandler    http.Handler
 )

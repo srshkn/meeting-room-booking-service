@@ -23,7 +23,7 @@ const (
 	Refresh string = "refresh"
 )
 
-type JWTManager interface {
+type Manager interface {
 	GenerateRefreshToken() (string, error)
 	CreateAccessToken(userID string) (string, error)
 	ValidateAccessToken(tokenString string) (*claims, error)
