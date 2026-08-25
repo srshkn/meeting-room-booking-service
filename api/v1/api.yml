@@ -344,6 +344,11 @@ paths:
       responses:
         '200':
           description: Успешная авторизация
+          headers:
+            Set-Cookie:
+              required: true
+              schema:
+                type: string
           content:
             application/json:
               schema:
