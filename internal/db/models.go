@@ -34,6 +34,14 @@ type RolePermission struct {
 	PermissionID uuid.UUID `json:"permission_id"`
 }
 
+type Room struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Description *string   `json:"description"`
+	Capacity    *int      `json:"capacity"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
 type User struct {
 	ID           uuid.UUID `json:"id"`
 	Username     string    `json:"username"`

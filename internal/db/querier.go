@@ -13,6 +13,7 @@ import (
 type Querier interface {
 	CheckUserExists(ctx context.Context, arg CheckUserExistsParams) (CheckUserExistsRow, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (uuid.UUID, error)
+	CreateRoom(ctx context.Context, arg CreateRoomParams) (Room, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
 	DeleteTokenHash(ctx context.Context, tokenHash string) error
 	GetTokenHash(ctx context.Context, tokenHash string) (RefreshToken, error)

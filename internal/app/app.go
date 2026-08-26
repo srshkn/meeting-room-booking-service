@@ -51,12 +51,13 @@ func New(
 
 	userService := user.NewService(db)
 	authService := auth.NewService(db, jwtManager)
+	roomService := room.NewService(db)
 
 	v1Handler := handlerApp.NewHandler(
 		meta.NewHandler(),
 		user.NewHandler(userService),
 		auth.NewHandler(authService, cookieManager),
-		room.NewHandler(),
+		room.NewHandler(roomService),
 		schedule.NewHandler(),
 		slot.NewHandler(),
 		booking.NewHandler(),
