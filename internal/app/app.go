@@ -65,6 +65,7 @@ func New(
 	strictHandler := v1GenAPI.NewStrictHandler(
 		v1Handler,
 		[]v1GenAPI.StrictMiddlewareFunc{
+			middleware.Authorization(logger),
 			middleware.Auth(logger, jwtManager),
 			middleware.Logging(logger),
 		},

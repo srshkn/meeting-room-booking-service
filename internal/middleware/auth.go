@@ -77,13 +77,20 @@ func Auth(logger *slog.Logger, jwtManager jwt.Manager) v1GenAPI.StrictMiddleware
 				return nil, fmt.Errorf("unauthorized %d", http.StatusUnauthorized)
 			}
 
-			newCTX := context.WithValue(
-				r.Context(),
-				userIDKey,
-				claims.UserID,
-			)
+			principal := Principal{
+				UserID:      claims.UserID,
+				Role:        claims.Role,
+				Permissions: append([]string(nil), claims.Permissions...),
+			}
 
-			return next(ctx, w, r.WithContext(newCTX), request)
+			newCtx := withPrincipal(ctx, principal)
+
+			return next(
+				newCtx,
+				w,
+				r.WithContext(newCtx),
+				request,
+			)
 		}
 	}
 }
