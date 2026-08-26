@@ -33,9 +33,18 @@ SELECT
     u.id,
     u.email,
     u.password_hash,
-    r.name AS role
+    r.name AS role,
+    ARRAY(
+        SELECT p.code
+        FROM role_permissions AS rp
+        JOIN permissions AS p
+            ON p.id = rp.permission_id
+        WHERE rp.role_id = u.role_id
+        ORDER BY p.code
+    )::text[] AS permissions
 FROM users AS u
-LEFT JOIN roles AS r ON r.id = u.role_id
+JOIN roles AS r 
+    ON r.id = u.role_id
 WHERE u.email = $1;
 
 -- name: GetUserByID :one
@@ -43,7 +52,15 @@ SELECT
     u.id,
     u.username,
     u.email,
-    r.name AS role
+    r.name AS role,
+    ARRAY(
+        SELECT p.code
+        FROM role_permissions AS rp
+        JOIN permissions AS p
+            ON p.id = rp.permission_id
+        WHERE rp.role_id = u.role_id
+        ORDER BY p.code
+    )::text[] AS permissions
 FROM users AS u
-LEFT JOIN roles AS r ON r.id = u.role_id
+JOIN roles AS r ON r.id = u.role_id
 WHERE u.id = $1;

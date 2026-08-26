@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const checkUserExists = `-- name: CheckUserExists :one
@@ -92,17 +91,26 @@ SELECT
     u.id,
     u.username,
     u.email,
-    r.name AS role
+    r.name AS role,
+    ARRAY(
+        SELECT p.code
+        FROM role_permissions AS rp
+        JOIN permissions AS p
+            ON p.id = rp.permission_id
+        WHERE rp.role_id = u.role_id
+        ORDER BY p.code
+    )::text[] AS permissions
 FROM users AS u
-LEFT JOIN roles AS r ON r.id = u.role_id
+JOIN roles AS r ON r.id = u.role_id
 WHERE u.id = $1
 `
 
 type GetUserByIDRow struct {
-	ID       uuid.UUID   `json:"id"`
-	Username string      `json:"username"`
-	Email    string      `json:"email"`
-	Role     pgtype.Text `json:"role"`
+	ID          uuid.UUID `json:"id"`
+	Username    string    `json:"username"`
+	Email       string    `json:"email"`
+	Role        string    `json:"role"`
+	Permissions []string  `json:"permissions"`
 }
 
 func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow, error) {
@@ -113,6 +121,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow
 		&i.Username,
 		&i.Email,
 		&i.Role,
+		&i.Permissions,
 	)
 	return i, err
 }
@@ -122,17 +131,27 @@ SELECT
     u.id,
     u.email,
     u.password_hash,
-    r.name AS role
+    r.name AS role,
+    ARRAY(
+        SELECT p.code
+        FROM role_permissions AS rp
+        JOIN permissions AS p
+            ON p.id = rp.permission_id
+        WHERE rp.role_id = u.role_id
+        ORDER BY p.code
+    )::text[] AS permissions
 FROM users AS u
-LEFT JOIN roles AS r ON r.id = u.role_id
+JOIN roles AS r 
+    ON r.id = u.role_id
 WHERE u.email = $1
 `
 
 type GetUserByLoginRow struct {
-	ID           uuid.UUID   `json:"id"`
-	Email        string      `json:"email"`
-	PasswordHash string      `json:"password_hash"`
-	Role         pgtype.Text `json:"role"`
+	ID           uuid.UUID `json:"id"`
+	Email        string    `json:"email"`
+	PasswordHash string    `json:"password_hash"`
+	Role         string    `json:"role"`
+	Permissions  []string  `json:"permissions"`
 }
 
 func (q *Queries) GetUserByLogin(ctx context.Context, email string) (GetUserByLoginRow, error) {
@@ -143,6 +162,7 @@ func (q *Queries) GetUserByLogin(ctx context.Context, email string) (GetUserByLo
 		&i.Email,
 		&i.PasswordHash,
 		&i.Role,
+		&i.Permissions,
 	)
 	return i, err
 }

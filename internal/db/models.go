@@ -10,6 +10,11 @@ import (
 	"github.com/google/uuid"
 )
 
+type Permission struct {
+	ID   uuid.UUID `json:"id"`
+	Code string    `json:"code"`
+}
+
 type RefreshToken struct {
 	ID        uuid.UUID `json:"id"`
 	UserID    uuid.UUID `json:"user_id"`
@@ -22,6 +27,11 @@ type RefreshToken struct {
 type Role struct {
 	ID   int16  `json:"id"`
 	Name string `json:"name"`
+}
+
+type RolePermission struct {
+	RoleID       int16     `json:"role_id"`
+	PermissionID uuid.UUID `json:"permission_id"`
 }
 
 type User struct {
