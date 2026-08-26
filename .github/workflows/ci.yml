@@ -219,13 +219,13 @@ jobs:
       postgres:
         image: postgres:18-alpine
         env:
-          POSTGRES_DB: ${{ secrets.TEST_DB_NAME }}
-          POSTGRES_USER: ${{ secrets.TEST_DB_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+          POSTGRES_DB: migrations
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U ${{ secrets.TEST_DB_USER }} -d ${{ secrets.TEST_DB_NAME }}"
+          --health-cmd "pg_isready -U postgres -d migrations"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
@@ -240,7 +240,7 @@ jobs:
             -v "${{ github.workspace }}/db/migrations:/migrations:ro" \
             migrate/migrate:v4.18.3 \
             -path /migrations \
-            -database "postgres://${{ secrets.TEST_DB_USER }}:${{ secrets.TEST_DB_PASSWORD }}@127.0.0.1:5432/${{ secrets.TEST_DB_NAME }}?sslmode=disable" \
+            -database "postgres://postgres:postgres@127.0.0.1:5432/migrations?sslmode=disable" \
             up
 
       - name: Roll back migrations
@@ -249,7 +249,7 @@ jobs:
             -v "${{ github.workspace }}/db/migrations:/migrations:ro" \
             migrate/migrate:v4.18.3 \
             -path /migrations \
-            -database "postgres://${{ secrets.TEST_DB_USER }}:${{ secrets.TEST_DB_PASSWORD }}@127.0.0.1:5432/${{ secrets.TEST_DB_NAME }}?sslmode=disable" \
+            -database "postgres://postgres:postgres@127.0.0.1:5432/migrations?sslmode=disable" \
             down -all
 
       - name: Reapply migrations
@@ -258,5 +258,5 @@ jobs:
             -v "${{ github.workspace }}/db/migrations:/migrations:ro" \
             migrate/migrate:v4.18.3 \
             -path /migrations \
-            -database "postgres://${{ secrets.TEST_DB_USER }}:${{ secrets.TEST_DB_PASSWORD }}@127.0.0.1:5432/${{ secrets.TEST_DB_NAME }}?sslmode=disable" \
+            -database "postgres://postgres:postgres@127.0.0.1:5432/migrations?sslmode=disable" \
             up
