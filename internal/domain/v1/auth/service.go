@@ -121,7 +121,7 @@ func (s *authService) Login(
 		return nil, refreshToken, err
 	}
 
-	return s.issueTokens(ctx, user.ID)
+	return s.issueTokens(ctx, user.ID, user.Role, user.Permissions)
 }
 
 func (s *authService) LoginDummy(
@@ -138,9 +138,9 @@ func (s *authService) LoginDummy(
 	}
 
 	if role == v1GenAPI.PostAuthDummyLoginJSONBodyRoleAdmin {
-		id = dummyUserID
-	} else {
 		id = dummyAdminID
+	} else {
+		id = dummyUserID
 	}
 
 	user, err := s.repo.GetUserByID(ctx, id)
@@ -148,12 +148,14 @@ func (s *authService) LoginDummy(
 		return nil, refreshToken, err
 	}
 
-	return s.issueTokens(ctx, user.ID)
+	return s.issueTokens(ctx, user.ID, user.Role, user.Permissions)
 }
 
 func (s *authService) issueTokens(
 	ctx context.Context,
 	userID uuid.UUID,
+	role string,
+	permissions []string,
 ) (
 	*v1GenAPI.Token,
 	jwt.RefreshToken,
@@ -163,7 +165,7 @@ func (s *authService) issueTokens(
 	var refreshToken jwt.RefreshToken
 	var err error
 
-	response.Token, err = s.jwt.CreateAccessToken(userID.String())
+	response.Token, err = s.jwt.CreateAccessToken(userID.String(), role, permissions)
 	if err != nil {
 		return nil, refreshToken, err
 	}

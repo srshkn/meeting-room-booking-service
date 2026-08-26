@@ -25,23 +25,31 @@ const (
 
 type Manager interface {
 	GenerateRefreshToken() (string, error)
-	CreateAccessToken(userID string) (string, error)
+	CreateAccessToken(userID, role string, permissions []string) (string, error)
 	ValidateAccessToken(tokenString string) (*claims, error)
 	HashToken(refreshToken string) string
 	RefreshTokenExpiresAt() time.Time
 }
 
 type claims struct {
-	UserID    string `json:"uid"`
-	TokenType string `json:"typ"`
+	UserID      string   `json:"uid"`
+	Role        string   `json:"rol"`
+	Permissions []string `json:"permissions"`
+	TokenType   string   `json:"typ"`
 
 	jwt.RegisteredClaims
 }
 
-func newClaims(userID, tokenType, issuer string, accessMinutes time.Duration) *claims {
+func newClaims(
+	userID, role, tokenType, issuer string,
+	permissions []string,
+	accessMinutes time.Duration,
+) *claims {
 	return &claims{
-		UserID:    userID,
-		TokenType: tokenType,
+		UserID:      userID,
+		Role:        role,
+		Permissions: permissions,
+		TokenType:   tokenType,
 
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(accessMinutes * time.Minute)),
@@ -66,11 +74,13 @@ func New(cfg config.JWT) *manager {
 	}
 }
 
-func (m *manager) CreateAccessToken(userID string) (string, error) {
+func (m *manager) CreateAccessToken(userID, role string, permissions []string) (string, error) {
 	claim := newClaims(
 		userID,
+		role,
 		m.accessName,
 		m.config.GetIssuer(),
+		permissions,
 		m.config.GetAccessExpires(),
 	)
 
