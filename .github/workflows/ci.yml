@@ -11,7 +11,6 @@ on:
       - .env.example
       - .version
       - docs/**
-      - db/**
       - api/*
       - .gitignore
       - .dockerignore
@@ -212,3 +211,52 @@ jobs:
             -f compose.yml \
             -f infra/compose/dev.yml \
             down -v --remove-orphans
+
+  checks-migrations:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: ${{ secrets.TEST_DB_NAME }}
+          POSTGRES_USER: ${{ secrets.TEST_DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ${{ secrets.TEST_DB_USER }} -d ${{ secrets.TEST_DB_NAME }}"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Apply migrations
+        run: |
+          docker run --rm --network host \
+            -v "${{ github.workspace }}/db/migrations:/migrations:ro" \
+            migrate/migrate:v4.18.3 \
+            -path /migrations \
+            -database "postgres://${{ secrets.TEST_DB_USER }}:${{ secrets.TEST_DB_PASSWORD }}@127.0.0.1:5432/${{ secrets.TEST_DB_NAME }}?sslmode=disable" \
+            up
+
+      - name: Roll back migrations
+        run: |
+          docker run --rm --network host \
+            -v "${{ github.workspace }}/db/migrations:/migrations:ro" \
+            migrate/migrate:v4.18.3 \
+            -path /migrations \
+            -database "postgres://${{ secrets.TEST_DB_USER }}:${{ secrets.TEST_DB_PASSWORD }}@127.0.0.1:5432/${{ secrets.TEST_DB_NAME }}?sslmode=disable" \
+            down -all
+
+      - name: Reapply migrations
+        run: |
+          docker run --rm --network host \
+            -v "${{ github.workspace }}/db/migrations:/migrations:ro" \
+            migrate/migrate:v4.18.3 \
+            -path /migrations \
+            -database "postgres://${{ secrets.TEST_DB_USER }}:${{ secrets.TEST_DB_PASSWORD }}@127.0.0.1:5432/${{ secrets.TEST_DB_NAME }}?sslmode=disable" \
+            up
