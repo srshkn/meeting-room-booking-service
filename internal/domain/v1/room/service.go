@@ -11,6 +11,7 @@ import (
 
 type RoomService interface {
 	CreateRoom(ctx context.Context, body v1GenAPI.PostRoomsCreateJSONRequestBody) (*v1GenAPI.Room, error)
+	GetListRooms(ctx context.Context) ([]v1GenAPI.Room, error)
 }
 
 type roomService struct {
@@ -65,4 +66,27 @@ func (s *roomService) CreateRoom(
 		Capacity:    createRoom.Capacity,
 		CreatedAt:   &createRoom.CreatedAt,
 	}, nil
+}
+
+func (s *roomService) GetListRooms(
+	ctx context.Context,
+) ([]v1GenAPI.Room, error) {
+	listRooms := make([]v1GenAPI.Room, 0)
+
+	rooms, err := s.repo.GetRoomList(ctx)
+	if err != nil {
+		return listRooms, err
+	}
+
+	for _, val := range rooms {
+		listRooms = append(listRooms, v1GenAPI.Room{
+			Id:          val.ID,
+			Name:        val.Name,
+			Description: val.Description,
+			Capacity:    val.Capacity,
+			CreatedAt:   &val.CreatedAt,
+		})
+	}
+
+	return listRooms, nil
 }

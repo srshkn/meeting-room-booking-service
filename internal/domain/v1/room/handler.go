@@ -54,5 +54,12 @@ func (h *roomHandler) GetRoomsList(
 	ctx context.Context,
 	request v1GenAPI.GetRoomsListRequestObject,
 ) (v1GenAPI.GetRoomsListResponseObject, error) {
-	return nil, nil
+	rooms, err := h.svc.GetListRooms(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return v1GenAPI.GetRoomsList200JSONResponse{
+		Rooms: &rooms,
+	}, nil
 }
