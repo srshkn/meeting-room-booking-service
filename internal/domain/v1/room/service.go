@@ -30,7 +30,7 @@ func (s *roomService) validateCreateRoom(name string, cap *int) error {
 	}
 
 	if cap != nil &&
-		(*cap < 0 || *cap > math.MaxInt32) {
+		(*cap <= 0 || *cap > math.MaxInt32) {
 		return ErrInvalidRoomCapacity
 	}
 
