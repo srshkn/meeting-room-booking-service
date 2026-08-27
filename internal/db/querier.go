@@ -14,11 +14,14 @@ type Querier interface {
 	CheckUserExists(ctx context.Context, arg CheckUserExistsParams) (CheckUserExistsRow, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (uuid.UUID, error)
 	CreateRoom(ctx context.Context, arg CreateRoomParams) (Room, error)
+	CreateSchedule(ctx context.Context, arg CreateScheduleParams) (CreateScheduleRow, error)
+	CreateSlots(ctx context.Context, arg CreateSlotsParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
 	DeleteTokenHash(ctx context.Context, tokenHash string) error
 	GetRoomList(ctx context.Context) ([]Room, error)
 	GetTokenHash(ctx context.Context, tokenHash string) (RefreshToken, error)
 	GetTokenUserID(ctx context.Context, userID uuid.UUID) (GetTokenUserIDRow, error)
+	GetUnbookedSlots(ctx context.Context) ([]GetUnbookedSlotsRow, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow, error)
 	GetUserByLogin(ctx context.Context, email string) (GetUserByLoginRow, error)
 }

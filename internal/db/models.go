@@ -8,7 +8,17 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type Booking struct {
+	ID             uuid.UUID `json:"id"`
+	SlotID         uuid.UUID `json:"slot_id"`
+	UserID         uuid.UUID `json:"user_id"`
+	Status         string    `json:"status"`
+	ConferenceLink *string   `json:"conference_link"`
+	CreatedAt      time.Time `json:"created_at"`
+}
 
 type Permission struct {
 	ID   uuid.UUID `json:"id"`
@@ -40,6 +50,25 @@ type Room struct {
 	Description *string   `json:"description"`
 	Capacity    *int      `json:"capacity"`
 	CreatedAt   time.Time `json:"created_at"`
+}
+
+type Schedule struct {
+	ID        uuid.UUID   `json:"id"`
+	RoomID    uuid.UUID   `json:"room_id"`
+	StartTime pgtype.Time `json:"start_time"`
+	EndTime   pgtype.Time `json:"end_time"`
+	CreatedAt time.Time   `json:"created_at"`
+}
+
+type ScheduleDay struct {
+	ScheduleID uuid.UUID `json:"schedule_id"`
+	DayOfWeek  int16     `json:"day_of_week"`
+}
+
+type Slot struct {
+	ID        uuid.UUID `json:"id"`
+	RoomID    uuid.UUID `json:"room_id"`
+	StartTime time.Time `json:"start_time"`
 }
 
 type User struct {
