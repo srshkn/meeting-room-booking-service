@@ -63,12 +63,15 @@ func New(
 		booking.NewHandler(),
 	)
 
-	strictHandler := v1GenAPI.NewStrictHandler(
+	strictHandler := v1GenAPI.NewStrictHandlerWithOptions(
 		v1Handler,
 		[]v1GenAPI.StrictMiddlewareFunc{
 			middleware.Authorization(logger),
 			middleware.Auth(logger, jwtManager),
 			middleware.Logging(logger),
+		},
+		v1GenAPI.StrictHTTPServerOptions{
+			ResponseErrorHandlerFunc: middleware.WriteResponseError,
 		},
 	)
 

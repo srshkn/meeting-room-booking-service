@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -14,8 +13,7 @@ import (
 )
 
 const (
-	userIDKey string = "user_id"
-	prefix    string = "Bearer "
+	prefix string = "Bearer "
 )
 
 var protectedOperations = map[string]struct{}{
@@ -29,17 +27,17 @@ var protectedOperations = map[string]struct{}{
 	"PostBookingsBookingIdCancel":   {},
 }
 
-func extractBearerToken(rowToken string) (string, error) {
+func extractBearerToken(rawToken string) (string, error) {
 
-	if rowToken == "" {
+	if rawToken == "" {
 		return "", errors.New("missing authorization header")
 	}
 
-	if !strings.HasPrefix(rowToken, prefix) {
+	if !strings.HasPrefix(rawToken, prefix) {
 		return "", errors.New("invalid authorization scheme")
 	}
 
-	token := strings.TrimSpace(strings.TrimPrefix(rowToken, prefix))
+	token := strings.TrimSpace(strings.TrimPrefix(rawToken, prefix))
 	if token == "" {
 		return "", errors.New("missing bearer token")
 	}
@@ -64,17 +62,35 @@ func Auth(logger *slog.Logger, jwtManager jwt.Manager) v1GenAPI.StrictMiddleware
 
 			tokenString, err := extractBearerToken(r.Header.Get("Authorization"))
 			if err != nil {
-				return nil, err
+				logger.Warn(
+					"access token rejected",
+					slog.String("method", r.Method),
+					slog.String("path", r.URL.Path),
+					slog.Any("error", err),
+					slog.String("remote_addr", r.RemoteAddr),
+				)
+				return nil, NewHTTPError(
+					http.StatusUnauthorized,
+					v1GenAPI.UNAUTHORIZED,
+					"authentication required",
+				)
 			}
 
 			claims, err := jwtManager.ValidateAccessToken(tokenString)
 			if err != nil {
 				logger.Warn(
 					"access token rejected",
-					slog.String("operation", operationID),
+					slog.String("method", r.Method),
+					slog.String("path", r.URL.Path),
 					slog.Any("error", err),
+					slog.String("remote_addr", r.RemoteAddr),
 				)
-				return nil, fmt.Errorf("unauthorized %d", http.StatusUnauthorized)
+
+				return nil, NewHTTPError(
+					http.StatusUnauthorized,
+					v1GenAPI.UNAUTHORIZED,
+					"invalid or expired access token",
+				)
 			}
 
 			principal := Principal{

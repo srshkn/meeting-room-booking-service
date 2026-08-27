@@ -52,9 +52,7 @@ func Authorization(logger *slog.Logger) v1GenAPI.StrictMiddlewareFunc {
 			r *http.Request,
 			request any,
 		) (any, error) {
-			requiredPermission, protected :=
-				operationPermissions[operationID]
-
+			requiredPermission, protected := operationPermissions[operationID]
 			if !protected {
 				return next(ctx, w, r, request)
 			}
@@ -63,10 +61,16 @@ func Authorization(logger *slog.Logger) v1GenAPI.StrictMiddlewareFunc {
 			if !ok {
 				logger.Warn(
 					"principal missing from context",
-					slog.String("operation", operationID),
+					slog.String("method", r.Method),
+					slog.String("path", r.URL.Path),
+					slog.String("remote_addr", r.RemoteAddr),
 				)
 
-				return nil, ErrUnauthorized
+				return nil, NewHTTPError(
+					http.StatusUnauthorized,
+					v1GenAPI.UNAUTHORIZED,
+					"authentication required",
+				)
 			}
 
 			for _, permission := range principal.Permissions {
@@ -83,7 +87,11 @@ func Authorization(logger *slog.Logger) v1GenAPI.StrictMiddlewareFunc {
 				slog.String("required_permission", requiredPermission),
 			)
 
-			return nil, ErrForbidden
+			return nil, NewHTTPError(
+				http.StatusForbidden,
+				v1GenAPI.FORBIDDEN,
+				"insufficient permissions",
+			)
 		}
 	}
 }
