@@ -41,3 +41,40 @@ func (q *Queries) CreateRoom(ctx context.Context, arg CreateRoomParams) (Room, e
 	)
 	return i, err
 }
+
+const getRoomList = `-- name: GetRoomList :many
+SELECT 
+    id,
+    name,
+    description,
+    capacity,
+    created_at
+FROM rooms
+ORDER BY name ASC
+`
+
+func (q *Queries) GetRoomList(ctx context.Context) ([]Room, error) {
+	rows, err := q.db.Query(ctx, getRoomList)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Room{}
+	for rows.Next() {
+		var i Room
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.Capacity,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

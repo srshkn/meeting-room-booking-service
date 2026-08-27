@@ -16,6 +16,7 @@ type Querier interface {
 	CreateRoom(ctx context.Context, arg CreateRoomParams) (Room, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
 	DeleteTokenHash(ctx context.Context, tokenHash string) error
+	GetRoomList(ctx context.Context) ([]Room, error)
 	GetTokenHash(ctx context.Context, tokenHash string) (RefreshToken, error)
 	GetTokenUserID(ctx context.Context, userID uuid.UUID) (GetTokenUserIDRow, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow, error)

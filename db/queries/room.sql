@@ -10,3 +10,13 @@ VALUES (
     $3
 )
 RETURNING id, name, description, capacity, created_at;
+
+-- name: GetRoomList :many
+SELECT 
+    id,
+    name,
+    description,
+    capacity,
+    created_at
+FROM rooms
+ORDER BY name ASC;
